@@ -13,7 +13,7 @@ To link the database:
 - To-do: 
     1. Definir a Arquitetura de Dados (Modelagem)
 Como suas tabelas já existem no Postgres, o primeiro passo no backend é mapeá-las no código. Em vez de escrever SQL puro (SELECT * FROM...), você usará o SQLAlchemy para transformar essas tabelas em Classes Python. Isso facilita muito a manutenção e evita erros de digitação.
-2. Criar a Camada de API (FastAPI ou Flask)
+ --> 2. Criar a Camada de API (FastAPI ou Flask)
 O "coração" do backend é a API. Você precisará escolher um framework (recomendo fortemente o FastAPI por ser moderno e rápido).
 	Swagger (Pra testar a API)
     Aqui você cria as "portas de entrada" (Endpoints), como /pedidos, /estoque ou /usuarios.
