@@ -8,3 +8,6 @@ __pycache__/
 
 #Python files
 app.py
+
+#Env file
+*.env

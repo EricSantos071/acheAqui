@@ -13,8 +13,8 @@ To link the database:
 - To-do: 
     1. Definir a Arquitetura de Dados (Modelagem)
 Como suas tabelas já existem no Postgres, o primeiro passo no backend é mapeá-las no código. Em vez de escrever SQL puro (SELECT * FROM...), você usará o SQLAlchemy para transformar essas tabelas em Classes Python. Isso facilita muito a manutenção e evita erros de digitação.
- --> 2. Criar a Camada de API (FastAPI ou Flask)
-O "coração" do backend é a API. Você precisará escolher um framework (recomendo fortemente o FastAPI por ser moderno e rápido).
+ --> 2. Criar a Camada de API (FastAPI)
+O "coração" do backend é a API. Você precisará escolher um framework (recomendo fortemente o FastAPI por ser moderno e rápido). (Gotta deal with an ORM)
 	Swagger (Pra testar a API)
     Aqui você cria as "portas de entrada" (Endpoints), como /pedidos, /estoque ou /usuarios.
     O Backend recebe requisições, valida se quem pediu tem permissão e consulta o banco.
@@ -31,5 +31,12 @@ O backend deve ser o segurança do seu projeto. Você precisará implementar:
 
 6. Validação de Dados (Pydantic)
 Antes de salvar qualquer coisa no Postgres, o backend deve garantir que os dados estão no formato correto (ex: se um preço é realmente um número e não um texto).
+
+20/03/26
+ - FastAPI usage to link existing Postgre database (using psycopg)
+
+21/03/26
+ - I asked Claude to help on databse.py :v
+ Added .env file to store sensitive info
 
 
