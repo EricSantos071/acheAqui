@@ -5,10 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg
 import psycopg_pool
 from psycopg.rows import dict_row # useful for returning results as dictionaries
+from pathlib import Path # Searching stuff on directories
 from dotenv import load_dotenv
 
 #1. Load environment variables for security and safe measures (not obligatory btw)
-load_dotenv()
+# Always loads .env from the same folder as database.py
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+
+#Testing if it connects
+print(">>> DATABASE_URL:", os.getenv("DATABASE_URL"))
 
 #1.5 DB Moved away haha to an .env
 DATABASE_URL = os.getenv("DATABASE_URL")
