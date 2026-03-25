@@ -39,4 +39,7 @@ Antes de salvar qualquer coisa no Postgres, o backend deve garantir que os dados
  - I asked Claude to help on databse.py :v
  Added .env file to store sensitive info
 
+25/03/26
+ - Updated databse and tested /docs, connection was a success
+ - Continuing the following: Post/Put/Delete ; User Authentication ; File Upload ; Filtering and Pagination
 
