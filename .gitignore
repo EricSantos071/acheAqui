@@ -7,7 +7,7 @@ __pycache__/
 *.pyc
 
 #Python files
-app.py
+
 
 #Env file
 *.env
