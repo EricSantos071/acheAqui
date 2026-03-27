@@ -26,3 +26,9 @@ To link the database:
  - Now main.py takes care of the entry point, FastAPI app, middleware registering, import routers and pool lifespan
  - __init__.py on models and routers directories : empty files that tell Python "this folder is a package you can import from."
  - Now the 4 routers take care of importing get_db from database.py, instead of it handling it all
+
+26/03/26
+ - Creating Pydantic properties on /models
+ - 3 Class Pattern per table: Base(Holds shared fields) Create(extends for POST requests), Response(Adds DB fields for GET Responses).
+ - Redone the /models files because of me doing Schroedinger's Keys (SpiderMan points at FK and PK being the same lol)
+ 
