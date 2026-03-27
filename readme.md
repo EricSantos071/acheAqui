@@ -37,4 +37,5 @@ To link the database:
         inventory — ProductBase now requires entrepreneur_id and optional category_id. ProductImageBase now requires product_id. All tables have Update models.
         ordering — Every table now has its FK columns: cart has product_id + client_id, orders has client_id, payments has client_id + order_id, promos has all three FKs, transactions has payment_id, and delivery now has real fields instead of being empty.
         analytics — ReviewBase now has product_id + client_id.
-- Time for the GET/POST/PUT now (Changing routers dir files)
+- Time for the GET/POST/PUT now (Changing routers dir files):
+    - Updated Inventory and testing on Database
