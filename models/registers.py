@@ -1,97 +1,126 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import date, datetime
 from typing import Optional
 
- 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ADDRESS
+# Must come before ClientBase since clients reference address_id
+# ══════════════════════════════════════════════════════════════════════════════
+
+class AddressBase(BaseModel):
+    street: str
+    house_num: str          # changed from int to str — preserves formatting
+    street_extra: Optional[str] = None
+    neighborhood: str
+    zip_code: str           # changed from int to str — preserves leading zeros
+    city: str
+    state: str              # 2-char code e.g. "SC"
+    country: str
+
+
+class AddressCreate(AddressBase):
+    """Used for POST /registers/address"""
+    pass
+
+
+class AddressUpdate(BaseModel):
+    """Used for PUT /registers/address/{id} — all fields optional"""
+    street: Optional[str] = None
+    house_num: Optional[str] = None
+    street_extra: Optional[str] = None
+    neighborhood: Optional[str] = None
+    zip_code: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+
+
+class AddressResponse(AddressBase):
+    address_id: int
+
+    class Config:
+        from_attributes = True
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ENTREPRENEURS
+# Must come before ClientBase since clients optionally reference entrepreneur_id
+# ══════════════════════════════════════════════════════════════════════════════
+
+class EntrepreneurBase(BaseModel):
+    doc_cnpj: str           # changed from int to str — preserves leading zeros
+    phone: str              # changed from int to str — preserves formatting
+    status: bool = True
+
+
+class EntrepreneurCreate(EntrepreneurBase):
+    """Used for POST /registers/entrepreneurs"""
+    pass
+
+
+class EntrepreneurUpdate(BaseModel):
+    """Used for PUT /registers/entrepreneurs/{id} — all fields optional"""
+    doc_cnpj: Optional[str] = None
+    phone: Optional[str] = None
+    status: Optional[bool] = None
+
+
+class EntrepreneurResponse(EntrepreneurBase):
+    entrepreneurs_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # CLIENTS
 # ══════════════════════════════════════════════════════════════════════════════
- 
+
 class ClientBase(BaseModel):
-    """
-    Fields shared between creating and responding.
-    These are the fields the user fills in when registering.
-    """
     first_name: str
     last_name: str
-    doc_cpf: str           # "012.345.678-90" or "01234567890" — no leading zero loss
+    doc_cpf: str            # changed from int to str — preserves leading zeros
     email: str
-    client_phone: str      # "+55 48 99999-9999"
+    client_phone: str       # changed from int to str — preserves formatting
     birthdate: date
-    status: bool = True    # defaults to active when creating
- 
- 
+    status: bool = True
+    address_id: int         # FK → registers.address
+    entrepreneur_id: Optional[int] = None  # FK → registers.entrepreneurs (nullable)
+
+
 class ClientCreate(ClientBase):
     """
-    Used for POST /registers/clients
-    Extends ClientBase by adding the password field.
-    We separate this so the password never leaks into GET responses.
+    Used for POST /registers/clients.
+    Password is only here — never returned in responses.
+    Will be hashed before saving (auth step coming later).
     """
-    password: str          # will be hashed before saving (auth step)
- 
- 
+    password: str
+
+
+class ClientUpdate(BaseModel):
+    """Used for PUT /registers/clients/{id} — all fields optional"""
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    doc_cpf: Optional[str] = None
+    email: Optional[str] = None
+    client_phone: Optional[str] = None
+    birthdate: Optional[date] = None
+    status: Optional[bool] = None
+    address_id: Optional[int] = None
+    entrepreneur_id: Optional[int] = None
+
+
 class ClientResponse(ClientBase):
     """
-    Used for GET responses — includes DB-generated fields.
+    Used for GET responses.
     Never includes password.
     """
     clients_id: int
     created_at: datetime
     updated_at: datetime
- 
-    class Config:
-        from_attributes = True  # allows mapping from DB dict rows to this model
- 
- 
-# ══════════════════════════════════════════════════════════════════════════════
-# ADDRESS
-# ══════════════════════════════════════════════════════════════════════════════
- 
-class AddressBase(BaseModel):
-    street: str
-    house_num: str
-    street_extra: Optional[str] = None  # e.g. "Apt 4B" — optional in practice
-    neighborhood: str
-    zip_code: str          # 01234-567
-    city: str
-    state: str             # 2-char code, e.g. "SC"
-    country: str
- 
- 
-class AddressCreate(AddressBase):
-    """Used for POST /registers/address"""
-    pass               # no extra fields needed beyond AddressBase
- 
- 
-class AddressResponse(AddressBase):
-    """Used for GET responses."""
-    address_id: int
- 
+
     class Config:
         from_attributes = True
- 
- 
-# ══════════════════════════════════════════════════════════════════════════════
-# ENTREPRENEURS
-# ══════════════════════════════════════════════════════════════════════════════
- 
-class EntrepreneurBase(BaseModel):
-    doc_cnpj: str          # 01.234.567/0089-10 or 01234567008910
-    phone: str
-    status: bool = True
- 
- 
-class EntrepreneurCreate(EntrepreneurBase):
-    """Used for POST /registers/entrepreneurs"""
-    pass
- 
- 
-class EntrepreneurResponse(EntrepreneurBase):
-    """Used for GET responses."""
-    entrepreneurs_id: int
-    created_at: datetime
-    updated_at: datetime
- 
-    class Config:
-        from_attributes = True
- 

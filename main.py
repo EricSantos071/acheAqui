@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 # ── App instance ───────────────────────────────────────────────────────────────
 app = FastAPI(
     title="AcheAqui API",
-    version="1.0.1",
+    version="1.0.2",
     lifespan=lifespan,
 )
  

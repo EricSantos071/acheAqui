@@ -31,4 +31,10 @@ To link the database:
  - Creating Pydantic properties on /models
  - 3 Class Pattern per table: Base(Holds shared fields) Create(extends for POST requests), Response(Adds DB fields for GET Responses).
  - Redone the /models files because of me doing Schroedinger's Keys (SpiderMan points at FK and PK being the same lol)
- 
+    - What changed from the previous version
+        Every model now reflects the real DB structure exactly. The key additions per schema:
+        registers — ClientBase now requires address_id and has optional entrepreneur_id. AddressBase and EntrepreneurBase use str for CPF, CNPJ, phone and ZIP. All three tables now have Update models too.
+        inventory — ProductBase now requires entrepreneur_id and optional category_id. ProductImageBase now requires product_id. All tables have Update models.
+        ordering — Every table now has its FK columns: cart has product_id + client_id, orders has client_id, payments has client_id + order_id, promos has all three FKs, transactions has payment_id, and delivery now has real fields instead of being empty.
+        analytics — ReviewBase now has product_id + client_id.
+- Time for the GET/POST/PUT now (Changing routers dir files)
