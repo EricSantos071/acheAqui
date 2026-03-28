@@ -39,3 +39,10 @@ To link the database:
         analytics — ReviewBase now has product_id + client_id.
 - Time for the GET/POST/PUT now (Changing routers dir files):
     - Updated Inventory and testing on Database
+
+27/03/26
+- Routers test solo on Inventory no good, updated the rest of the routers too (Redoing test as 1.1.1)
+    - Also updated the database, forgot to add AutoIncrementing PKs and FKs (Keys hate me lol)
+    - I forgot the NOW() on timestamps to auto upgrade :v (Reediting db again lol)
+    - Creating /assets/images to test local uploaded images onto Uvicorn
+- CRUD Test with Claude steps on POST were a success (Still gotta improve the Jason Web Token before moving on)
