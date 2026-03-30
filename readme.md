@@ -46,3 +46,9 @@ To link the database:
     - I forgot the NOW() on timestamps to auto upgrade :v (Reediting db again lol)
     - Creating /assets/images to test local uploaded images onto Uvicorn
 - CRUD Test with Claude steps on POST were a success (Still gotta improve the Jason Web Token before moving on)
+
+30/03/26
+- Time for the authentication login/register process
+- Installed python jose for cryptography and hashing
+- auth file as the engine room(root) (User logs, gets token, gets approved, enter the place)
+- Updated main.py to register the auth router - Testing new registering

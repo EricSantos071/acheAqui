@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from psycopg.rows import dict_row
 import psycopg
 
@@ -14,7 +15,6 @@ router = APIRouter()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ADDRESS
-# Must be created before clients since clients require address_id
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/address", response_model=list[AddressResponse])
@@ -133,7 +133,6 @@ async def delete_address(
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ENTREPRENEURS
-# Must be created before clients (clients optionally reference entrepreneur_id)
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/entrepreneurs", response_model=list[EntrepreneurResponse])
@@ -183,7 +182,11 @@ async def create_entrepreneur(
                 VALUES (%s, %s, %s)
                 RETURNING *;
                 """,
-                (entrepreneur.doc_cnpj, entrepreneur.phone, entrepreneur.status)
+                (
+                    entrepreneur.doc_cnpj,
+                    entrepreneur.phone,
+                    entrepreneur.status,
+                )
             )
             return await cur.fetchone()
     except Exception as e:
@@ -244,12 +247,11 @@ async def delete_entrepreneur(
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CLIENTS
-# Requires address_id (and optionally entrepreneur_id) to exist first
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/clients", response_model=list[ClientResponse])
 async def get_clients(conn: psycopg.AsyncConnection = Depends(get_db("registers"))):
-    """Returns all clients."""
+    """Returns all clients. Password is never included in response."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute("SELECT * FROM clients;")
@@ -283,15 +285,39 @@ async def get_client(
 @router.post("/clients", response_model=ClientResponse, status_code=201)
 async def create_client(
     client: ClientCreate,
-    conn: psycopg.AsyncConnection = Depends(get_db("registers"))
+    conn: psycopg.AsyncConnection = Depends(get_db("registers")),
+    x_admin_key: str = Header(..., description="Admin secret key required to use this endpoint.")
 ):
     """
-    Creates a new client.
-    NOTE: Password is stored as plain text for now.
-    We will hash it properly in the authentication step.
+    Admin-only endpoint to create a client directly.
+    Requires the X-Admin-Key header to match the ADMIN_KEY in .env.
+    For regular user registration use POST /auth/register instead.
+    Password is hashed automatically — plain text never touches the DB.
     """
+    # Validate admin key before doing anything else
+    if x_admin_key != os.getenv("ADMIN_KEY"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid admin key."
+        )
     try:
+        from auth import hash_password  # imported here to avoid circular imports
         async with conn.cursor(row_factory=dict_row) as cur:
+
+            # Check for duplicate email
+            await cur.execute(
+                "SELECT clients_id FROM clients WHERE email = %s;",
+                (client.email,)
+            )
+            if await cur.fetchone():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="A client with this email already exists."
+                )
+
+            # Hash password before saving
+            hashed = hash_password(client.password)
+
             await cur.execute(
                 """
                 INSERT INTO clients
@@ -307,13 +333,16 @@ async def create_client(
                     client.email,
                     client.client_phone,
                     client.birthdate,
-                    client.password,   # ⚠️ plain text for now — auth step will hash this
+                    hashed,
                     client.status,
                     client.address_id,
                     client.entrepreneur_id,
                 )
             )
             return await cur.fetchone()
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
