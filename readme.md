@@ -52,3 +52,4 @@ To link the database:
 - Installed python jose for cryptography and hashing
 - auth file as the engine room(root) (User logs, gets token, gets approved, enter the place)
 - Updated main.py to register the auth router - Testing new registering
+    - Self note: USE bcrypt 4.0.1 ... anything above it bugs the auth stuff :v
