@@ -3,6 +3,7 @@ from psycopg.rows import dict_row
 import psycopg
 
 from database import get_db
+from auth import get_current_user, get_current_entrepreneur
 from models.inventory import (
     CategoryCreate, CategoryUpdate, CategoryResponse,
     ProductCreate, ProductUpdate, ProductResponse,
@@ -13,12 +14,11 @@ router = APIRouter()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# CATEGORY
+# CATEGORY — public reads, protected writes
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/category", response_model=list[CategoryResponse])
 async def get_categories(conn: psycopg.AsyncConnection = Depends(get_db("inventory"))):
-    """Returns all categories."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute("SELECT * FROM category;")
@@ -30,21 +30,13 @@ async def get_categories(conn: psycopg.AsyncConnection = Depends(get_db("invento
 @router.post("/category", response_model=CategoryResponse, status_code=201)
 async def create_category(
     category: CategoryCreate,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)  # entrepreneurs only
 ):
-    """
-    Creates a new category.
-    status_code=201 means 'Created' — more precise than the default 200 'OK'.
-    RETURNING * gives us the new row back without a second query.
-    """
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
-                """
-                INSERT INTO category (category_name)
-                VALUES (%s)
-                RETURNING *;
-                """,
+                "INSERT INTO category (category_name) VALUES (%s) RETURNING *;",
                 (category.category_name,)
             )
             return await cur.fetchone()
@@ -56,23 +48,15 @@ async def create_category(
 async def update_category(
     category_id: int,
     category: CategoryUpdate,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """
-    Updates a category by ID.
-    We only update fields that were actually sent (not None).
-    This is what makes CategoryUpdate's Optional fields useful.
-    """
     try:
-        # Build the SET clause dynamically from only the fields that were sent
-        # e.g. if only category_name was sent: SET category_name = %s
         fields = {k: v for k, v in category.model_dump().items() if v is not None}
         if not fields:
             raise HTTPException(status_code=400, detail="No fields provided to update.")
-
         set_clause = ", ".join(f"{k} = %s" for k in fields)
         values = list(fields.values()) + [category_id]
-
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 f"UPDATE category SET {set_clause} WHERE category_id = %s RETURNING *;",
@@ -88,23 +72,19 @@ async def update_category(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/category/{category_id}", status_code=200)
+@router.delete("/category/{category_id}")
 async def delete_category(
     category_id: int,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """
-    Deletes a category by ID.
-    Returns a confirmation message instead of the deleted row.
-    """
     try:
         async with conn.cursor() as cur:
             await cur.execute(
                 "DELETE FROM category WHERE category_id = %s RETURNING category_id;",
                 (category_id,)
             )
-            row = await cur.fetchone()
-            if row is None:
+            if await cur.fetchone() is None:
                 raise HTTPException(status_code=404, detail="Category not found.")
             return {"message": f"Category {category_id} deleted successfully."}
     except HTTPException:
@@ -114,12 +94,11 @@ async def delete_category(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PRODUCTS
+# PRODUCTS — public reads, entrepreneur-only writes with ownership check
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/products", response_model=list[ProductResponse])
 async def get_products(conn: psycopg.AsyncConnection = Depends(get_db("inventory"))):
-    """Returns all products."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute("SELECT * FROM products;")
@@ -133,10 +112,11 @@ async def get_product(
     product_id: int,
     conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
 ):
-    """Returns a single product by ID."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
-            await cur.execute("SELECT * FROM products WHERE product_id = %s;", (product_id,))
+            await cur.execute(
+                "SELECT * FROM products WHERE product_id = %s;", (product_id,)
+            )
             row = await cur.fetchone()
             if row is None:
                 raise HTTPException(status_code=404, detail="Product not found.")
@@ -150,9 +130,14 @@ async def get_product(
 @router.post("/products", response_model=ProductResponse, status_code=201)
 async def create_product(
     product: ProductCreate,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)  # entrepreneurs only
 ):
-    """Creates a new product."""
+    """
+    Only entrepreneurs can create products.
+    entrepreneur_id is taken from the logged-in user — not from the request body.
+    This prevents an entrepreneur from creating products under another's name.
+    """
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
@@ -170,7 +155,7 @@ async def create_product(
                     product.price,
                     product.in_stock,
                     product.status,
-                    product.entrepreneur_id,
+                    current_user["entrepreneur_id"],  # ← always from token, never from body
                     product.category_id,
                 )
             )
@@ -183,48 +168,68 @@ async def create_product(
 async def update_product(
     product_id: int,
     product: ProductUpdate,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Updates a product by ID. Only sends the fields you want to change."""
+    """Only the entrepreneur who owns the product can update it."""
     try:
-        fields = {k: v for k, v in product.model_dump().items() if v is not None}
-        if not fields:
-            raise HTTPException(status_code=400, detail="No fields provided to update.")
-
-        set_clause = ", ".join(f"{k} = %s" for k in fields)
-        values = list(fields.values()) + [product_id]
-
         async with conn.cursor(row_factory=dict_row) as cur:
-            await cur.execute(
-                f"UPDATE products SET {set_clause} WHERE product_id = %s RETURNING *;",
-                values
-            )
-            row = await cur.fetchone()
-            if row is None:
-                raise HTTPException(status_code=404, detail="Product not found.")
-            return row
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.delete("/products/{product_id}", status_code=200)
-async def delete_product(
-    product_id: int,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
-):
-    """Deletes a product by ID."""
-    try:
-        async with conn.cursor() as cur:
+            # Ownership check
             await cur.execute(
-                "DELETE FROM products WHERE product_id = %s RETURNING product_id;",
+                "SELECT entrepreneur_id FROM products WHERE product_id = %s;",
                 (product_id,)
             )
             row = await cur.fetchone()
             if row is None:
                 raise HTTPException(status_code=404, detail="Product not found.")
+            if row["entrepreneur_id"] != current_user["entrepreneur_id"]:
+                raise HTTPException(status_code=403, detail="You don't own this product.")
+
+            fields = {k: v for k, v in product.model_dump().items() if v is not None}
+            if not fields:
+                raise HTTPException(status_code=400, detail="No fields provided to update.")
+            set_clause = ", ".join(f"{k} = %s" for k in fields)
+            values = list(fields.values()) + [product_id]
+
+            await cur.execute(
+                f"UPDATE products SET {set_clause} WHERE product_id = %s RETURNING *;",
+                values
+            )
+            return await cur.fetchone()
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/products/{product_id}")
+async def delete_product(
+    product_id: int,
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)
+):
+    """Only the entrepreneur who owns the product can delete it."""
+    try:
+        async with conn.cursor(row_factory=dict_row) as cur:
+
+            # Ownership check
+            await cur.execute(
+                "SELECT entrepreneur_id FROM products WHERE product_id = %s;",
+                (product_id,)
+            )
+            row = await cur.fetchone()
+            if row is None:
+                raise HTTPException(status_code=404, detail="Product not found.")
+            if row["entrepreneur_id"] != current_user["entrepreneur_id"]:
+                raise HTTPException(status_code=403, detail="You don't own this product.")
+
+            await cur.execute(
+                "DELETE FROM products WHERE product_id = %s;", (product_id,)
+            )
             return {"message": f"Product {product_id} deleted successfully."}
+
     except HTTPException:
         raise
     except Exception as e:
@@ -232,12 +237,11 @@ async def delete_product(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PRODUCT IMAGES
+# PRODUCT IMAGES — public reads, entrepreneur-only writes
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/product_images", response_model=list[ProductImageResponse])
 async def get_product_images(conn: psycopg.AsyncConnection = Depends(get_db("inventory"))):
-    """Returns all product images."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute("SELECT * FROM product_images;")
@@ -251,12 +255,10 @@ async def get_images_by_product(
     product_id: int,
     conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
 ):
-    """Returns all images for a specific product."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
-                "SELECT * FROM product_images WHERE product_id = %s;",
-                (product_id,)
+                "SELECT * FROM product_images WHERE product_id = %s;", (product_id,)
             )
             return await cur.fetchall()
     except Exception as e:
@@ -266,17 +268,14 @@ async def get_images_by_product(
 @router.post("/product_images", response_model=ProductImageResponse, status_code=201)
 async def create_product_image(
     image: ProductImageCreate,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Adds a new image URL for a product."""
+    """Only entrepreneurs can add product images."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
-                """
-                INSERT INTO product_images (image_url, product_id)
-                VALUES (%s, %s)
-                RETURNING *;
-                """,
+                "INSERT INTO product_images (image_url, product_id) VALUES (%s, %s) RETURNING *;",
                 (image.image_url, image.product_id)
             )
             return await cur.fetchone()
@@ -284,50 +283,20 @@ async def create_product_image(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/product_images/{product_img_id}", response_model=ProductImageResponse)
-async def update_product_image(
-    product_img_id: int,
-    image: ProductImageUpdate,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
-):
-    """Updates a product image by its own ID."""
-    try:
-        fields = {k: v for k, v in image.model_dump().items() if v is not None}
-        if not fields:
-            raise HTTPException(status_code=400, detail="No fields provided to update.")
-
-        set_clause = ", ".join(f"{k} = %s" for k in fields)
-        values = list(fields.values()) + [product_img_id]
-
-        async with conn.cursor(row_factory=dict_row) as cur:
-            await cur.execute(
-                f"UPDATE product_images SET {set_clause} WHERE product_img_id = %s RETURNING *;",
-                values
-            )
-            row = await cur.fetchone()
-            if row is None:
-                raise HTTPException(status_code=404, detail="Image not found.")
-            return row
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/product_images/{product_img_id}", status_code=200)
+@router.delete("/product_images/{product_img_id}")
 async def delete_product_image(
     product_img_id: int,
-    conn: psycopg.AsyncConnection = Depends(get_db("inventory"))
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Deletes a product image by its own ID."""
+    """Only entrepreneurs can delete product images."""
     try:
-        async with conn.cursor() as cur:
+        async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 "DELETE FROM product_images WHERE product_img_id = %s RETURNING product_img_id;",
                 (product_img_id,)
             )
-            row = await cur.fetchone()
-            if row is None:
+            if await cur.fetchone() is None:
                 raise HTTPException(status_code=404, detail="Image not found.")
             return {"message": f"Image {product_img_id} deleted successfully."}
     except HTTPException:

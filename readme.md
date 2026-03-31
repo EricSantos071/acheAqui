@@ -53,3 +53,12 @@ To link the database:
 - auth file as the engine room(root) (User logs, gets token, gets approved, enter the place)
 - Updated main.py to register the auth router - Testing new registering
     - Self note: USE bcrypt 4.0.1 ... anything above it bugs the auth stuff :v
+
+31/03/26
+- Updating main.py temporarly to get the authentication button to show up (Succesful tests!)
+- Updating dependencies and registration points (Only logged clients/entrepreneurs do what they are supposed to do) (Protect Key routes with Filtering), modded auth.py and routers files updated too
+    - Inventory — category/product/image writes require get_current_entrepreneur. Product PUT/DELETE also verify the entrepreneur owns that specific product before allowing changes.
+    - Ordering — cart, orders, payments and delivery are fully scoped to the logged-in client. GET /ordering/orders no longer returns all orders — only yours. Same for cart, payments and delivery. client_id is always taken from the token, never from the request body.
+    - Registers — /clients/me replaces /clients/{id} for self-service. Clients can only edit and delete their own account. Entrepreneur PUT verifies you own that business record.
+    - Analytics — reviews are public to read but require login to write. PUT/DELETE verify you wrote the review.
+    - New endpoint — POST /auth/register/entrepreneur lets a logged-in client register their business in one step.

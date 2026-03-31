@@ -11,7 +11,7 @@ import psycopg
 
 from database import get_db
 
-# ── Load environment variables ─────────────────────────────────────────────────
+# ── Environment ────────────────────────────────────────────────────────────────
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 480))
@@ -20,55 +20,39 @@ if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY environment variable not set.")
 
 # ── Password hashing ───────────────────────────────────────────────────────────
-# CryptContext handles all the bcrypt complexity for us.
-# "deprecated=auto" means older hashes get upgraded automatically.
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(plain_password: str) -> str:
-    """Converts a plain text password into a bcrypt hash."""
+    """Converts plain text to bcrypt hash."""
+    if len(plain_password.encode("utf-8")) > 72:
+        raise ValueError("Password must be 72 characters or fewer.")
     return pwd_context.hash(plain_password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Checks if a plain text password matches a stored hash.
-    Returns True if match, False if not.
-    Never compares passwords directly — always use this function.
-    """
+    """Checks plain text against stored hash."""
+    if len(plain_password.encode("utf-8")) > 72:
+        return False
     return pwd_context.verify(plain_password, hashed_password)
 
 # ── JWT Token ──────────────────────────────────────────────────────────────────
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """
-    Creates a signed JWT token containing the user's data.
-    The token expires after ACCESS_TOKEN_EXPIRE_MINUTES (default 480 = 8 hours).
-    After expiry the user must log in again.
-    """
+    """Creates a signed JWT token."""
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 # ── OAuth2 scheme ──────────────────────────────────────────────────────────────
-# This tells FastAPI where to expect the token in requests.
-# Clients send: Authorization: Bearer <token>
-# The /docs UI will show a lock icon and an Authorize button automatically.
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# ── Get current user dependency ────────────────────────────────────────────────
+# ── Dependency: get_current_user ───────────────────────────────────────────────
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     conn: psycopg.AsyncConnection = Depends(get_db("registers"))
 ):
     """
-    Dependency you attach to any protected endpoint.
-    Decodes the JWT token, finds the user in the DB, and returns them.
-    If the token is invalid or expired, raises 401 Unauthorized.
-
-    Usage in any router:
-        from auth import get_current_user
-        @router.get("/protected")
-        async def protected(current_user = Depends(get_current_user)):
-            return {"hello": current_user["first_name"]}
+    Base dependency — decodes JWT and returns the full client row.
+    Use this on any endpoint that just needs a logged-in user.
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -76,15 +60,13 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        # Decode and verify the token signature
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")  # "sub" is JWT standard for subject/user
+        email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    # Fetch the user from the DB using the email stored in the token
     async with conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(
             "SELECT * FROM clients WHERE email = %s;",
@@ -95,4 +77,28 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
-    return user  # the full client row — available in any protected endpoint
+    return user
+
+
+# ── Dependency: get_current_entrepreneur ───────────────────────────────────────
+async def get_current_entrepreneur(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Extends get_current_user — also checks the client has an entrepreneur_id.
+    Use this on any endpoint that only entrepreneurs can access.
+
+    Usage:
+        @router.post("/products")
+        async def create_product(
+            product: ProductCreate,
+            conn = Depends(get_db("inventory")),
+            current_user = Depends(get_current_entrepreneur)  ← blocks non-entrepreneurs
+        ):
+    """
+    if current_user["entrepreneur_id"] is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only registered entrepreneurs can perform this action."
+        )
+    return current_user
