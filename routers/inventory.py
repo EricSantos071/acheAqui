@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from psycopg.rows import dict_row
+from decimal import Decimal
+from typing import Optional
 import psycopg
 
 from database import get_db
@@ -14,15 +16,45 @@ router = APIRouter()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# CATEGORY — public reads, protected writes
+# CATEGORY
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/category", response_model=list[CategoryResponse])
-async def get_categories(conn: psycopg.AsyncConnection = Depends(get_db("inventory"))):
+async def get_categories(
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    search: Optional[str] = Query(None, description="Filter by category name"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(20, ge=1, le=100, description="Results per page"),
+):
+    """
+    Returns categories with optional name search and pagination.
+    Example: /inventory/category?search=ele&page=1&limit=10
+    """
     try:
+        filters, values = [], []
+
+        if search:
+            filters.append("category_name ILIKE %s")
+            values.append(f"%{search}%")
+
+        where = "WHERE " + " AND ".join(filters) if filters else ""
+        values += [limit, (page - 1) * limit]
+
         async with conn.cursor(row_factory=dict_row) as cur:
-            await cur.execute("SELECT * FROM category;")
-            return await cur.fetchall()
+            await cur.execute(
+                f"SELECT * FROM category {where} ORDER BY category_id LIMIT %s OFFSET %s;",
+                values
+            )
+            rows = await cur.fetchall()
+
+            # Total count for the frontend to know how many pages exist
+            await cur.execute(
+                f"SELECT COUNT(*) FROM category {where};",
+                values[:-2] if filters else []
+            )
+            total = (await cur.fetchone())["count"]
+
+        return {"data": rows, "page": page, "limit": limit, "total": total}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -31,7 +63,7 @@ async def get_categories(conn: psycopg.AsyncConnection = Depends(get_db("invento
 async def create_category(
     category: CategoryCreate,
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
-    current_user: dict = Depends(get_current_entrepreneur)  # entrepreneurs only
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
@@ -59,8 +91,7 @@ async def update_category(
         values = list(fields.values()) + [category_id]
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
-                f"UPDATE category SET {set_clause} WHERE category_id = %s RETURNING *;",
-                values
+                f"UPDATE category SET {set_clause} WHERE category_id = %s RETURNING *;", values
             )
             row = await cur.fetchone()
             if row is None:
@@ -94,15 +125,87 @@ async def delete_category(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PRODUCTS — public reads, entrepreneur-only writes with ownership check
+# PRODUCTS
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router.get("/products", response_model=list[ProductResponse])
-async def get_products(conn: psycopg.AsyncConnection = Depends(get_db("inventory"))):
+@router.get("/products")
+async def get_products(
+    conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(20, ge=1, le=100, description="Results per page"),
+    search: Optional[str] = Query(None, description="Search by product name or description"),
+    category_id: Optional[int] = Query(None, description="Filter by category"),
+    status: Optional[bool] = Query(None, description="Filter by availability"),
+    min_price: Optional[Decimal] = Query(None, description="Minimum price"),
+    max_price: Optional[Decimal] = Query(None, description="Maximum price"),
+    entrepreneur_id: Optional[int] = Query(None, description="Filter by entrepreneur"),
+):
+    """
+    Returns products with rich filtering and pagination.
+
+    Examples:
+      /inventory/products?search=notebook&page=1&limit=20
+      /inventory/products?category_id=1&status=true
+      /inventory/products?min_price=10&max_price=100
+      /inventory/products?entrepreneur_id=1
+    """
     try:
+        filters, values = [], []
+
+        if search:
+            # ILIKE = case-insensitive search across name AND description
+            filters.append("(product_name ILIKE %s OR description ILIKE %s)")
+            values += [f"%{search}%", f"%{search}%"]
+
+        if category_id is not None:
+            filters.append("category_id = %s")
+            values.append(category_id)
+
+        if status is not None:
+            filters.append("status = %s")
+            values.append(status)
+
+        if min_price is not None:
+            filters.append("price >= %s")
+            values.append(min_price)
+
+        if max_price is not None:
+            filters.append("price <= %s")
+            values.append(max_price)
+
+        if entrepreneur_id is not None:
+            filters.append("entrepreneur_id = %s")
+            values.append(entrepreneur_id)
+
+        where = "WHERE " + " AND ".join(filters) if filters else ""
+        count_values = values.copy()
+        values += [limit, (page - 1) * limit]
+
         async with conn.cursor(row_factory=dict_row) as cur:
-            await cur.execute("SELECT * FROM products;")
-            return await cur.fetchall()
+            await cur.execute(
+                f"""
+                SELECT * FROM products
+                {where}
+                ORDER BY product_id
+                LIMIT %s OFFSET %s;
+                """,
+                values
+            )
+            rows = await cur.fetchall()
+
+            await cur.execute(
+                f"SELECT COUNT(*) FROM products {where};",
+                count_values
+            )
+            total = (await cur.fetchone())["count"]
+
+        return {
+            "data": rows,
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "pages": -(-total // limit)  # ceiling division — total pages
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -131,13 +234,8 @@ async def get_product(
 async def create_product(
     product: ProductCreate,
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
-    current_user: dict = Depends(get_current_entrepreneur)  # entrepreneurs only
+    current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """
-    Only entrepreneurs can create products.
-    entrepreneur_id is taken from the logged-in user — not from the request body.
-    This prevents an entrepreneur from creating products under another's name.
-    """
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
@@ -149,14 +247,9 @@ async def create_product(
                 RETURNING *;
                 """,
                 (
-                    product.product_name,
-                    product.barcode,
-                    product.description,
-                    product.price,
-                    product.in_stock,
-                    product.status,
-                    current_user["entrepreneur_id"],  # ← always from token, never from body
-                    product.category_id,
+                    product.product_name, product.barcode, product.description,
+                    product.price, product.in_stock, product.status,
+                    current_user["entrepreneur_id"], product.category_id,
                 )
             )
             return await cur.fetchone()
@@ -171,14 +264,10 @@ async def update_product(
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
     current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Only the entrepreneur who owns the product can update it."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
-
-            # Ownership check
             await cur.execute(
-                "SELECT entrepreneur_id FROM products WHERE product_id = %s;",
-                (product_id,)
+                "SELECT entrepreneur_id FROM products WHERE product_id = %s;", (product_id,)
             )
             row = await cur.fetchone()
             if row is None:
@@ -193,11 +282,9 @@ async def update_product(
             values = list(fields.values()) + [product_id]
 
             await cur.execute(
-                f"UPDATE products SET {set_clause} WHERE product_id = %s RETURNING *;",
-                values
+                f"UPDATE products SET {set_clause} WHERE product_id = %s RETURNING *;", values
             )
             return await cur.fetchone()
-
     except HTTPException:
         raise
     except Exception as e:
@@ -210,26 +297,18 @@ async def delete_product(
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
     current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Only the entrepreneur who owns the product can delete it."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
-
-            # Ownership check
             await cur.execute(
-                "SELECT entrepreneur_id FROM products WHERE product_id = %s;",
-                (product_id,)
+                "SELECT entrepreneur_id FROM products WHERE product_id = %s;", (product_id,)
             )
             row = await cur.fetchone()
             if row is None:
                 raise HTTPException(status_code=404, detail="Product not found.")
             if row["entrepreneur_id"] != current_user["entrepreneur_id"]:
                 raise HTTPException(status_code=403, detail="You don't own this product.")
-
-            await cur.execute(
-                "DELETE FROM products WHERE product_id = %s;", (product_id,)
-            )
+            await cur.execute("DELETE FROM products WHERE product_id = %s;", (product_id,))
             return {"message": f"Product {product_id} deleted successfully."}
-
     except HTTPException:
         raise
     except Exception as e:
@@ -237,7 +316,7 @@ async def delete_product(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PRODUCT IMAGES — public reads, entrepreneur-only writes
+# PRODUCT IMAGES
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.get("/product_images", response_model=list[ProductImageResponse])
@@ -271,7 +350,6 @@ async def create_product_image(
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
     current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Only entrepreneurs can add product images."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
@@ -289,7 +367,6 @@ async def delete_product_image(
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
     current_user: dict = Depends(get_current_entrepreneur)
 ):
-    """Only entrepreneurs can delete product images."""
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(

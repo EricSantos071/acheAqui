@@ -62,3 +62,13 @@ To link the database:
     - Registers — /clients/me replaces /clients/{id} for self-service. Clients can only edit and delete their own account. Entrepreneur PUT verifies you own that business record.
     - Analytics — reviews are public to read but require login to write. PUT/DELETE verify you wrote the review.
     - New endpoint — POST /auth/register/entrepreneur lets a logged-in client register their business in one step.
+
+01/04/26
+- Filtering and pagination time!
+    - Products — the richest filter set since it's the core of your marketplace. Search hits both product_name AND description at once using OR. Price range uses >= and <= so you can set just one side (min_price=50 alone works fine).
+    - Orders/Payments — scoped to the logged-in client first, then filtered. A client can never see another client's orders even if they guess the right filters.
+    - Promos — public, filterable by status, category and product. The frontend can use status=true to show only active promos.
+    - Reviews — has one bonus field in the response: avg_rating. When the frontend loads a product page it can hit /analytics/reviews?product_id=1 and get both the review list AND the average rating in one request.
+
+- Cloudinary registration and code modded to upload product images
+    - The flow will be: frontend picks a file → sends it to your API → API uploads to Cloudinary → gets back a URL → saves that URL to product_images table → returns the full image record. 
