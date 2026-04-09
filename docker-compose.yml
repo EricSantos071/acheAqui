@@ -1,0 +1,54 @@
+version: "3.9"
+ 
+# ── What is docker-compose? ────────────────────────────────────────────────────
+# docker-compose lets you run multiple containers together.
+# Your app needs two things to run:
+#   1. The FastAPI app (built from your Dockerfile)
+#   2. A PostgreSQL database
+# docker-compose starts both and connects them automatically.
+
+services:
+ 
+  # ── Service 1: PostgreSQL database ──────────────────────────────────────────
+  db:
+    image: postgres:16                    # same version you're using locally
+    container_name: acheaqui_db
+    restart: always                       # restart if it crashes
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}   # read from .env — never hardcode
+      POSTGRES_DB: fastapi_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # persist data between restarts
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # runs on first startup
+    ports:
+      - "5433:5432"                       # expose to host so DBeaver still works, 5433 cuz the previous one is being used
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  # ── Service 2: FastAPI app ───────────────────────────────────────────────────
+  api:
+    build: .                              # build from your Dockerfile
+    container_name: acheaqui_api
+    restart: always
+    env_file:
+      - .env                              # loads all your .env variables
+    environment:
+      # Override DATABASE_URL to point to the db container
+      # Note: use "db" as hostname — that's the service name above
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db:5432/fastapi_db
+    ports:
+      - "8000:8000"                       # host:container
+    depends_on:
+      db:
+        condition: service_healthy        # wait for DB to be ready before starting
+    volumes:
+      - .:/app                            # mount your code for live reloading
+ 
+  # ── Named volumes ──────────────────────────────────────────────────────────────
+  # This keeps your database data even when containers are stopped/removed.
+volumes:
+  postgres_data:

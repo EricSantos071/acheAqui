@@ -1,0 +1,16 @@
+# ── requirements.txt ──────────────────────────────────────────────────────────
+# This file lists every Python package your app needs.
+# Docker uses this to install dependencies inside the container.
+# Generate/update it anytime with: pip freeze > requirements.txt
+
+fastapi
+uvicorn[standard]
+psycopg[binary]
+psycopg-pool
+python-dotenv
+pydantic[email]
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1
+cloudinary
+python-multipart

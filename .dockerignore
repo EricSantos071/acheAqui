@@ -1,0 +1,39 @@
+# ── .dockerignore ─────────────────────────────────────────────────────────────
+# Works exactly like .gitignore but for Docker.
+# Files listed here are NOT copied into the container image.
+# This keeps your image small and prevents secrets from leaking.
+
+# Virtual environment — Docker installs its own from requirements.txt
+.venv
+venv
+env
+
+# Environment files — secrets should never go into the image
+.env
+.env.*
+
+# Python cache files — not needed inside container
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Git files — not needed inside container
+.git
+.gitignore
+
+# VS Code settings
+.vscode
+
+# Test files
+tests/
+pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files themselves
+Dockerfile
+docker-compose.yml

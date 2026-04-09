@@ -76,3 +76,25 @@ To link the database:
     - upload.py — the Cloudinary engine. upload_image() takes raw bytes, uploads them organized into folders by product (acheaqui/products/{product_id}/), auto-compresses, auto-converts to WebP for browsers that support it, and caps dimensions at 1200x1200. delete_image() extracts the Cloudinary public_id from the stored URL and removes it from the cloud when you delete from the DB.
     - New endpoint — POST /inventory/products/{product_id}/upload — takes a file directly, validates type and size before touching Cloudinary, checks ownership, uploads, saves the URL to product_images and returns the full record.
     - DELETE is now smarter — it deletes from both Cloudinary AND the DB in the right order, keeping your storage clean.
+
+07/04/26
+- What are we doing? Docking! (Interestellar theme plays)
+
+08/04/26
+- For docking we use: docker login -u "username"
+- docker compose up -d --build (Use -d otherwise the current terminal locks on and u need to open another one)
+- Step by Step on how to do it e.e
+# 1. Bump the version (follow the pattern: major.minor.patch)
+#    patch = bug fix (1.0.0 → 1.0.1)
+#    minor = new feature (1.0.0 → 1.1.0)
+#    major = breaking change (1.0.0 → 2.0.0)
+
+# 2. Build with new version
+docker build -t yourdockerhubusername/acheaqui-api:1.0.1 .
+
+# 3. Push new version
+docker push yourdockerhubusername/acheaqui-api:1.0.1
+
+# 4. Update latest tag
+docker tag yourdockerhubusername/acheaqui-api:1.0.1 yourdockerhubusername/acheaqui-api:latest
+docker push yourdockerhubusername/acheaqui-api:latest
