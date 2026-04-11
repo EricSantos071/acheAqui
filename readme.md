@@ -98,3 +98,23 @@ docker push yourdockerhubusername/acheaqui-api:1.0.1
 # 4. Update latest tag
 docker tag yourdockerhubusername/acheaqui-api:1.0.1 yourdockerhubusername/acheaqui-api:latest
 docker push yourdockerhubusername/acheaqui-api:latest
+
+09/04/26
+- Found a Front-end Open Source to use! Here: https://github.com/CoolAssPuppy/landing-pages.git
+Into modulating the frontend to hold a frontend page for our eCommerce
+
+10/04/26
+- Modded colors to a orange theme on the globals.css to try it out
+- Updated example-partner.ts to our new homepage
+- Updated site.ts for the whole new layout as a global config
+- Updated index.ts for the page registry (Each new page added goes here)
+    - I broke it's original function lol, rebuilt into something extra to be able to pull the pages
+    - Fixed the 
+- Modded gitignore and dockerignore
+- Updated .env.local to get the connection with my API
+- Created new folder at src/app -> products/ containing pages for the products initially
+    What each file does
+    - page.tsx runs on the server — fetches products and categories in parallel before sending HTML to the browser. The product grid arrives pre-filled, not empty. Google sees real products.
+    - ProductsClient.tsx takes over on the browser — handles the search input, category dropdown, price range and pagination. Every filter change hits your GET /inventory/products endpoint with the right query params. Shows a skeleton animation while loading.
+    - ProductCard.tsx is a pure display component — receives one product, shows image (or a placeholder if none uploaded yet), name, description, price in BRL format, stock count, and an "Esgotado" badge when out of stock. Clicking it will navigate to /products/{id} which we build next.
+

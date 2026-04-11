@@ -8,6 +8,10 @@ __pycache__/
 
 #Python files
 
-
 #Env file
 *.env
+
+# Frontend .gitignore in the root of acheAqui and add these lines
+echo "acheaqui-frontend/node_modules/" >> .gitignore
+echo "acheaqui-frontend/.next/" >> .gitignore
+echo "acheaqui-frontend/.env.local" >> .gitignore

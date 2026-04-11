@@ -25,6 +25,7 @@ __pycache__
 
 # VS Code settings
 .vscode
+readme.md
 
 # Test files
 tests/
@@ -37,3 +38,13 @@ Thumbs.db
 # Docker files themselves
 Dockerfile
 docker-compose.yml
+
+#acheaqui-frontend/ files
+acheaqui-frontend/node_modules/
+acheaqui-frontend/.next/
+acheaqui-frontend/.env
+acheaqui-frontend/.env.local
+acheaqui-frontend/.env.*
+acheaqui-frontend/.git/
+acheaqui-frontend/.DS_Store
+acheaqui-frontend/README.md
