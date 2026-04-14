@@ -21,12 +21,24 @@ async def register(
     conn: psycopg.AsyncConnection = Depends(get_db("registers"))
 ):
     """
-    Registers a new client (buyer).
-    entrepreneur_id will be null until they register their business
-    via POST /auth/register/entrepreneur.
+    Registers a new client.
+
+    Minimal required fields:
+      - first_name, last_name
+      - doc_cpf, email, client_phone
+      - birthdate
+      - password (min 8 chars, max 72)
+
+    Optional fields (can be added later):
+      - address_id    → client adds address when placing first order
+      - entrepreneur_id → added via POST /auth/register/entrepreneur
+
+    This matches real e-commerce flow — don't ask for address on signup.
     """
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
+
+            # Check for duplicate email
             await cur.execute(
                 "SELECT clients_id FROM clients WHERE email = %s;",
                 (client.email,)
@@ -34,9 +46,21 @@ async def register(
             if await cur.fetchone():
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="A client with this email already exists."
+                    detail="Este e-mail já está cadastrado. / This email is already registered."
                 )
 
+            # Check for duplicate CPF
+            await cur.execute(
+                "SELECT clients_id FROM clients WHERE doc_cpf = %s;",
+                (client.doc_cpf,)
+            )
+            if await cur.fetchone():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Este CPF já está cadastrado. / This CPF is already registered."
+                )
+
+            # Hash password before saving
             hashed = hash_password(client.password)
 
             await cur.execute(
@@ -56,8 +80,8 @@ async def register(
                     client.birthdate,
                     hashed,
                     client.status,
-                    client.address_id,
-                    client.entrepreneur_id,
+                    client.address_id,       # None is fine — DB column is nullable
+                    client.entrepreneur_id,  # None is fine — DB column is nullable
                 )
             )
             return await cur.fetchone()
@@ -70,7 +94,6 @@ async def register(
 
 # ── Register entrepreneur ──────────────────────────────────────────────────────
 class EntrepreneurRegister(BaseModel):
-    """What a client sends to register their business."""
     doc_cnpj: str
     phone: str
 
@@ -83,25 +106,26 @@ async def register_entrepreneur(
 ):
     """
     Registers a business for an already logged-in client.
+
     Flow:
-      1. Client registers normally via POST /auth/register
-      2. Client logs in via POST /auth/login → gets token
-      3. Client hits this endpoint with their CNPJ + phone
-      4. We create the entrepreneur record and link it back to the client
+      1. Client registers via POST /auth/register (no business yet)
+      2. Client logs in → gets token
+      3. Client hits this endpoint with CNPJ + phone
+      4. Entrepreneur record created and linked to client automatically
 
     A client can only register one business.
     """
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
 
-            # 1. Check client doesn't already have a business
+            # Check client doesn't already have a business
             if current_user["entrepreneur_id"] is not None:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="You have already registered a business."
+                    detail="Você já possui um negócio cadastrado. / You already have a registered business."
                 )
 
-            # 2. Check CNPJ isn't already registered
+            # Check CNPJ isn't already registered
             await cur.execute(
                 "SELECT entrepreneurs_id FROM entrepreneurs WHERE doc_cnpj = %s;",
                 (data.doc_cnpj,)
@@ -109,10 +133,10 @@ async def register_entrepreneur(
             if await cur.fetchone():
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="This CNPJ is already registered."
+                    detail="Este CNPJ já está cadastrado. / This CNPJ is already registered."
                 )
 
-            # 3. Create the entrepreneur record
+            # Create entrepreneur record
             await cur.execute(
                 """
                 INSERT INTO entrepreneurs (doc_cnpj, phone, status)
@@ -123,7 +147,7 @@ async def register_entrepreneur(
             )
             entrepreneur = await cur.fetchone()
 
-            # 4. Link it back to the client
+            # Link back to client
             await cur.execute(
                 """
                 UPDATE clients
@@ -136,7 +160,7 @@ async def register_entrepreneur(
             updated_client = await cur.fetchone()
 
             return {
-                "message": "Business registered successfully.",
+                "message": "Negócio cadastrado com sucesso! / Business registered successfully.",
                 "entrepreneur_id": entrepreneur["entrepreneurs_id"],
                 "client_id": updated_client["clients_id"],
                 "doc_cnpj": entrepreneur["doc_cnpj"],
@@ -156,7 +180,7 @@ async def login(
 ):
     """
     Logs in a client and returns a JWT token.
-    Use email as the username field.
+    Use email as the username field in Swagger.
     """
     try:
         if len(form_data.password.encode("utf-8")) > 72:
@@ -173,11 +197,11 @@ async def login(
             client = await cur.fetchone()
 
             # Same error for wrong email or wrong password
-            # (prevents email enumeration attacks)
+            # prevents email enumeration attacks
             if not client or not verify_password(form_data.password, client["password"]):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Incorrect email or password.",
+                    detail="E-mail ou senha incorretos. / Incorrect email or password.",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
 

@@ -5,17 +5,16 @@ from typing import Optional
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ADDRESS
-# Must come before ClientBase since clients reference address_id
 # ══════════════════════════════════════════════════════════════════════════════
 
 class AddressBase(BaseModel):
     street: str
-    house_num: str          # changed from int to str — preserves formatting
+    house_num: str
     street_extra: Optional[str] = None
     neighborhood: str
-    zip_code: str           # changed from int to str — preserves leading zeros
+    zip_code: str
     city: str
-    state: str              # 2-char code e.g. "SC"
+    state: str
     country: str
 
 
@@ -45,22 +44,21 @@ class AddressResponse(AddressBase):
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ENTREPRENEURS
-# Must come before ClientBase since clients optionally reference entrepreneur_id
 # ══════════════════════════════════════════════════════════════════════════════
 
 class EntrepreneurBase(BaseModel):
-    doc_cnpj: str           # changed from int to str — preserves leading zeros
-    phone: str              # changed from int to str — preserves formatting
+    doc_cnpj: str
+    phone: str
     status: bool = True
 
 
 class EntrepreneurCreate(EntrepreneurBase):
-    """Used for POST /registers/entrepreneurs"""
+    """Used for POST /registers/entrepreneurs (admin only)"""
     pass
 
 
 class EntrepreneurUpdate(BaseModel):
-    """Used for PUT /registers/entrepreneurs/{id} — all fields optional"""
+    """Used for PUT /registers/entrepreneurs/{id}"""
     doc_cnpj: Optional[str] = None
     phone: Optional[str] = None
     status: Optional[bool] = None
@@ -80,20 +78,29 @@ class EntrepreneurResponse(EntrepreneurBase):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class ClientBase(BaseModel):
+    """
+    Core client fields — used for registration and responses.
+
+    address_id and entrepreneur_id are both optional here because:
+    - New users register without an address (added when placing first order)
+    - Most users are buyers, not entrepreneurs
+    - This matches how real e-commerce apps work (Shopee, Mercado Livre, etc.)
+    """
     first_name: str
     last_name: str
-    doc_cpf: str            # changed from int to str — preserves leading zeros
+    doc_cpf: str
     email: str
-    client_phone: str       # changed from int to str — preserves formatting
+    client_phone: str
     birthdate: date
     status: bool = True
-    address_id: int         # FK → registers.address
-    entrepreneur_id: Optional[int] = None  # FK → registers.entrepreneurs (nullable)
+    address_id: Optional[int] = None       # optional — added when placing first order
+    entrepreneur_id: Optional[int] = None  # optional — added via /auth/register/entrepreneur
 
 
 class ClientCreate(ClientBase):
     """
-    Used for POST /registers/clients.
+    Used for POST /auth/register and admin POST /registers/clients.
+    Password is hashed before saving — never stored as plain text.
     """
     password: str
 
@@ -108,7 +115,10 @@ class ClientCreate(ClientBase):
 
 
 class ClientUpdate(BaseModel):
-    """Used for PUT /registers/clients/{id} — all fields optional"""
+    """
+    Used for PUT /registers/clients/me — all fields optional.
+    Clients can update their own profile including adding an address later.
+    """
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     doc_cpf: Optional[str] = None
@@ -116,7 +126,7 @@ class ClientUpdate(BaseModel):
     client_phone: Optional[str] = None
     birthdate: Optional[date] = None
     status: Optional[bool] = None
-    address_id: Optional[int] = None
+    address_id: Optional[int] = None       # client adds address when ready
     entrepreneur_id: Optional[int] = None
 
 

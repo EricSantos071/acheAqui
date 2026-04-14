@@ -118,3 +118,7 @@ Into modulating the frontend to hold a frontend page for our eCommerce
     - ProductsClient.tsx takes over on the browser — handles the search input, category dropdown, price range and pagination. Every filter change hits your GET /inventory/products endpoint with the right query params. Shows a skeleton animation while loading.
     - ProductCard.tsx is a pure display component — receives one product, shows image (or a placeholder if none uploaded yet), name, description, price in BRL format, stock count, and an "Esgotado" badge when out of stock. Clicking it will navigate to /products/{id} which we build next.
 
+13/04/26
+- Minor design issue update - Database field in Pydantic not allowing Enterprise to be optional
+Changed models/registers.py and routers/auth.py
+- Also changed Address to be registered after the client registers, not before as it was in the order
