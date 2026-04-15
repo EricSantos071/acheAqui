@@ -127,3 +127,6 @@ Changed models/registers.py and routers/auth.py
 - Bruhhh Flameshot + Gemini can cook?! Modified Main page on the frontend
 - Created acheaqui-preview.ts and added it to index (Eventually will replace the old main page)
 - Created: login/register, store-profile and updated index for display
+
+15/04/26
+- 4 New Static pages just like before added for a later implementation (Product datil, check-out, cart, dashboard)

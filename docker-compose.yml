@@ -41,7 +41,7 @@ services:
       # Note: use "db" as hostname — that's the service name above
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db:5432/fastapi_db
     ports:
-      - "8000:8000"                       # host:container
+      - "8001:8000"                       # host:container, using 8001 first to not conflict with swagger
     depends_on:
       db:
         condition: service_healthy        # wait for DB to be ready before starting

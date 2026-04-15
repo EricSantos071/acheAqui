@@ -12,6 +12,11 @@ import { acheaquiPreviewPage } from "./acheaqui-preview";
 import { acheaquiLoginPage } from "./acheaqui-login";
 import { acheaquiRegisterPage } from "./acheaqui-register";
 import { acheaquiStoreProfilePage } from "./acheaqui-store-profile";
+// 15/04/26 New Pages!
+import { acheaquiProductDetailPage } from "./acheaqui-product-detail";
+import { acheaquiCartPage } from "./acheaqui-cart";
+import { acheaquiCheckoutPage } from "./acheaqui-checkout";
+import { acheaquiDashboardPage } from "./acheaqui-dashboard";
 
 // ── Example pages (kept as reference, not rendered unless slug is visited) ────
 // import { examplePartnerPage } from "./examples/example-partner";
@@ -26,6 +31,11 @@ export const pages: PageConfig[] = [
   acheaquiLoginPage,
   acheaquiRegisterPage,
   acheaquiStoreProfilePage,
+  // 15/04/26 Pagination
+  acheaquiProductDetailPage,
+  acheaquiCartPage,
+  acheaquiCheckoutPage,
+  acheaquiDashboardPage,
   // Phases ahead:
   // acheaquiProductsPage,    ← Phase 2
   // acheaquiLoginPage,       ← Phase 4
