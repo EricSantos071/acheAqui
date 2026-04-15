@@ -122,3 +122,8 @@ Into modulating the frontend to hold a frontend page for our eCommerce
 - Minor design issue update - Database field in Pydantic not allowing Enterprise to be optional
 Changed models/registers.py and routers/auth.py
 - Also changed Address to be registered after the client registers, not before as it was in the order
+
+14/04/26
+- Bruhhh Flameshot + Gemini can cook?! Modified Main page on the frontend
+- Created acheaqui-preview.ts and added it to index (Eventually will replace the old main page)
+- Created: login/register, store-profile and updated index for display
