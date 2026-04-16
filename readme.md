@@ -130,3 +130,4 @@ Changed models/registers.py and routers/auth.py
 
 15/04/26
 - 4 New Static pages just like before added for a later implementation (Product datil, check-out, cart, dashboard)
+- Updated FEnd pages: Cart, Checkout, Dashboard. Added: Success indicating a succesful order

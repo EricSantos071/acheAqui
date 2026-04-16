@@ -5,34 +5,66 @@ export const acheaquiCartPage: PartnerPageConfig = {
   slug: "carrinho",
 
   metadata: {
-    title: "Seu Carrinho — AcheAqui",
-    description: "Revise seus produtos antes de finalizar a compra.",
+    title: "Seu Carrinho Multi-loja — AcheAqui",
+    description: "Revise seus produtos de diferentes vendedores locais.",
   },
 
   partner: {
     name: "AcheAqui Marketplace",
     logo: "/images/placeholder-logo.png",
     logoDark: "/images/placeholder-logo.png",
-    description: "Checkout Seguro.",
+    description: "Consolidando seu apoio ao comércio local.",
   },
 
   hero: {
     title: "Seu Carrinho",
-    subtitle: "Total: R$ 25,00",
-    description: "Você tem 1 item no seu carrinho de 'Doces da Mari'.",
-    badge: "Resumo da Compra",
+    subtitle: "Total: R$ 57,00",
+    description: "Você está comprando de 2 lojas diferentes em sua região.",
+    badge: "Itens de Lojas Locais",
     ctas: [
-      { label: "Finalizar Compra", href: "/checkout", variant: "default" },
-      { label: "Continuar Comprando", href: "/", variant: "secondary" },
+      { label: "Ir para Pagamento", href: "/checkout", variant: "default" },
     ],
     image: {
-      src: "/images/ui/cart-illustration.png",
-      alt: "Ilustração de carrinho de compras",
+      src: "/images/ui/cart-multi.png",
+      alt: "Carrinho com produtos variados",
     },
   },
 
+  // ── Multi-Vendor Sections ──────────────────────────────────────────────────
+  contentBlocks: [
+    {
+      title: "Vendedor: Doces da Mari",
+      subtitle: "Frete para esta loja: R$ 7,00",
+      items: [
+        { icon: "shopping-bag", title: "Geleia de Morango", description: "1x R$ 25,00" },
+        { icon: "shopping-bag", title: "Brownie Artesanal", description: "2x R$ 16,00" },
+      ],
+      columns: 1,
+      variant: "cards",
+    },
+    {
+      title: "Vendedor: Horta do Zé",
+      subtitle: "Frete para esta loja: R$ 5,00",
+      items: [
+        { icon: "truck", title: "Cesta de Orgânicos P", description: "1x R$ 16,00" },
+      ],
+      columns: 1,
+      variant: "cards",
+    },
+  ],
+
+  // ── Financial Summary ──────────────────────────────────────────────────────
+  valueProposition: {
+    title: "Resumo do Pedido",
+    items: [
+      { icon: "tag", title: "Subtotal Produtos", description: "R$ 57,00" },
+      { icon: "truck", title: "Total de Fretes (2 lojas)", description: "R$ 12,00" },
+      { icon: "credit-card", title: "Total Geral", description: "R$ 69,00" },
+    ],
+  },
+
   bigQuote: {
-    quote: "Apoiar o comércio local é investir na sua própria comunidade.",
+    quote: "Comprar de múltiplos produtores locais fortalece toda a economia da nossa cidade.",
     author: "Equipe AcheAqui",
     role: "Marketplace",
     company: "AcheAqui",
@@ -42,18 +74,11 @@ export const acheaquiCartPage: PartnerPageConfig = {
     logoAlt: "Logo",
   },
 
-  valueProposition: {
-    title: "Itens no Carrinho",
-    items: [
-      { icon: "shopping-bag", title: "Geleia de Morango", description: "1x R$ 25,00" },
-    ],
+  offer: {
+    title: "Finalizar agora?",
+    description: "Seus produtos ficarão reservados por 30 minutos.",
+    cta: { label: "Finalizar Compra", href: "/checkout", variant: "default" },
   },
 
-  contentBlocks: [],
   socialProof: { stats: [], testimonials: [] },
-  offer: {
-    title: "Cupom de Desconto?",
-    description: "Você poderá inserir seu cupom na próxima etapa.",
-    cta: { label: "Ir para Checkout", href: "/checkout", variant: "default" },
-  },
 };

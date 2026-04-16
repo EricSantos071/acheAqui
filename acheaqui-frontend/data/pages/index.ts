@@ -17,6 +17,7 @@ import { acheaquiProductDetailPage } from "./acheaqui-product-detail";
 import { acheaquiCartPage } from "./acheaqui-cart";
 import { acheaquiCheckoutPage } from "./acheaqui-checkout";
 import { acheaquiDashboardPage } from "./acheaqui-dashboard";
+import { acheaquiSuccessPage } from "./acheaqui-success";
 
 // ── Example pages (kept as reference, not rendered unless slug is visited) ────
 // import { examplePartnerPage } from "./examples/example-partner";
@@ -36,6 +37,7 @@ export const pages: PageConfig[] = [
   acheaquiCartPage,
   acheaquiCheckoutPage,
   acheaquiDashboardPage,
+  acheaquiSuccessPage,
   // Phases ahead:
   // acheaquiProductsPage,    ← Phase 2
   // acheaquiLoginPage,       ← Phase 4
