@@ -5,18 +5,18 @@
 import type { PageConfig } from "@/types/page-config";
 
 // ── AcheAqui pages ────────────────────────────────────────────────────────────
-import { acheaquiHomePage } from "./acheaqui-home";
+//import { acheaquiHomePage } from "./acheaqui-home";
 
 // 14.04.26 NEW PAGE ADDED TO TEST OUT A FRONTEND WHILE CLAUDE LOADS TOKENS LOL
 import { acheaquiPreviewPage } from "./acheaqui-preview";
-import { acheaquiLoginPage } from "./acheaqui-login";
-import { acheaquiRegisterPage } from "./acheaqui-register";
+//import { acheaquiLoginPage } from "./acheaqui-login";
+//import { acheaquiRegisterPage } from "./acheaqui-register";
 import { acheaquiStoreProfilePage } from "./acheaqui-store-profile";
 // 15/04/26 New Pages!
 import { acheaquiProductDetailPage } from "./acheaqui-product-detail";
-import { acheaquiCartPage } from "./acheaqui-cart";
-import { acheaquiCheckoutPage } from "./acheaqui-checkout";
-import { acheaquiDashboardPage } from "./acheaqui-dashboard";
+// import { acheaquiCartPage } from "./acheaqui-cart";
+// import { acheaquiCheckoutPage } from "./acheaqui-checkout";
+// import { acheaquiDashboardPage } from "./acheaqui-dashboard";
 import { acheaquiSuccessPage } from "./acheaqui-success";
 
 // ── Example pages (kept as reference, not rendered unless slug is visited) ────
@@ -26,17 +26,17 @@ import { acheaquiSuccessPage } from "./acheaqui-success";
 // Add new pages here as you build them — the slug in each config
 // determines the URL it lives at (e.g. slug: "home" → /home)
 export const pages: PageConfig[] = [
-  acheaquiHomePage,
+  //acheaquiHomePage,
   // 14.04.26 NEW PAGE ADDED TO SELECTION
   acheaquiPreviewPage,
-  acheaquiLoginPage,
-  acheaquiRegisterPage,
+  //acheaquiLoginPage,
+  //acheaquiRegisterPage,
   acheaquiStoreProfilePage,
   // 15/04/26 Pagination
   acheaquiProductDetailPage,
-  acheaquiCartPage,
-  acheaquiCheckoutPage,
-  acheaquiDashboardPage,
+  // acheaquiCartPage,
+  // acheaquiCheckoutPage,
+  // acheaquiDashboardPage,
   acheaquiSuccessPage,
   // Phases ahead:
   // acheaquiProductsPage,    ← Phase 2

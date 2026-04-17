@@ -131,3 +131,10 @@ Changed models/registers.py and routers/auth.py
 15/04/26
 - 4 New Static pages just like before added for a later implementation (Product datil, check-out, cart, dashboard)
 - Updated FEnd pages: Cart, Checkout, Dashboard. Added: Success indicating a succesful order
+
+16/04/26
+- Out of tokens again lol, welp, making dynamic pages to split projects up: cart, checkout, dashboard, login, register
+- The rest will remain as static pages as of now
+
+17/04/26
+- I had an wild idea... I'll reset the frontend page, learn it from scratch, it served good as a template, but let's go with something me'ish made lol.
