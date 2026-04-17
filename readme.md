@@ -138,3 +138,11 @@ Changed models/registers.py and routers/auth.py
 
 17/04/26
 - I had an wild idea... I'll reset the frontend page, learn it from scratch, it served good as a template, but let's go with something me'ish made lol.
+    - types/index.ts — TypeScript now knows the shape of every piece of data from your backend. No more guessing field names.
+    - lib/auth.ts — token storage in one place. Every component that needs auth imports from here. Changing to cookies later means editing one file.
+    - lib/api.ts — every single API call in one file. If your backend URL changes, you change one line. If an endpoint changes, you fix one function.
+    - globals.css — your warm pastel theme applied everywhere automatically.
+    - layout.tsx — Navbar and Footer now appear on every page without you adding them manually.
+    - Navbar.tsx — reads localStorage on mount, shows login/logout based on auth state, has mobile menu, shows Dashboard link only to entrepreneurs.
+    - page.tsx — temporary redirect to /products so the app loads something at /.
+
