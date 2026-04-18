@@ -145,4 +145,5 @@ Changed models/registers.py and routers/auth.py
     - layout.tsx — Navbar and Footer now appear on every page without you adding them manually.
     - Navbar.tsx — reads localStorage on mount, shows login/logout based on auth state, has mobile menu, shows Dashboard link only to entrepreneurs.
     - page.tsx — temporary redirect to /products so the app loads something at /.
+- Had an inner fight with .css files, had to fit the whole stuff into @theme lol
 
