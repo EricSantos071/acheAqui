@@ -147,3 +147,22 @@ Changed models/registers.py and routers/auth.py
     - page.tsx — temporary redirect to /products so the app loads something at /.
 - Had an inner fight with .css files, had to fit the whole stuff into @theme lol
 
+20/04/26
+- Login page time! (Just before Tiradentes Lol) / page created at app/login/
+1. Show email + password form
+2. Call POST /auth/login via api.ts
+3. On success → store token + user in localStorage
+4. Redirect to /products (or wherever they came from)
+5. On error → show the error message from the API
+6. If already logged in → redirect away (no point showing login)
+
+- Register page as well!
+Step 1 — Basic info (everyone fills this)
+  first_name, last_name, CPF, email, phone, birthdate, password
+  → calls POST /auth/register
+
+Step 2 — Optional entrepreneur registration
+  "Deseja vender no AcheAqui?" → Yes/No choice
+  If Yes → shows CNPJ + phone fields
+          → calls POST /auth/register/entrepreneur
+  If No  → skips straight to login redirect
