@@ -166,3 +166,7 @@ Step 2 — Optional entrepreneur registration
   If Yes → shows CNPJ + phone fields
           → calls POST /auth/register/entrepreneur
   If No  → skips straight to login redirect
+
+- Fix onto products folder, lib folder with api files directing to localhost instead of 127.0.0.1 (Linux things...)
+- Fix applied onto main.py so CORS can accept the number version of API :v
+

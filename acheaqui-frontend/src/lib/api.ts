@@ -22,7 +22,7 @@ import type {
   PaginatedResponse,
 } from "@/types";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 // ── Helper: handle response errors consistently ────────────────────────────────
 async function handleResponse<T>(res: Response): Promise<T> {
