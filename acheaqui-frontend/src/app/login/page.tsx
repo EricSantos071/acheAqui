@@ -1,55 +1,35 @@
 "use client";
 
-// ── src/app/login/page.tsx ────────────────────────────────────────────────────
-// Login page — /login
-//
-// "use client" because this page:
-//   - Has a form with controlled inputs (useState)
-//   - Calls the API on submit
-//   - Writes to localStorage after success
-//   - Redirects programmatically
-//
-// No server-side fetch needed here — login is always interactive.
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/api";
-import { setToken, setStoredUser, isLoggedIn } from "@/lib/auth";
-import { getMe } from "@/lib/api";
+import { login, getMe } from "@/lib/api";
+import { setToken, setStoredUser } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-
-  // ── Form state ─────────────────────────────────────────────────────────────
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Redirect if already logged in ──────────────────────────────────────────
-  // No point showing login to someone already authenticated
-  useEffect(() => {
-    if (isLoggedIn()) {
-      router.replace("/products");
-    }
-  }, [router]);
+  // ── No automatic redirect here ─────────────────────────────────────────────
+  // If user explicitly navigated to /login we let them log in
+  // even if a token exists — useful for switching accounts
 
-  // ── Submit handler ─────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();         // prevent browser default form submission
-    setError(null);             // clear any previous error
+    e.preventDefault();
+    setError(null);
     setLoading(true);
 
     try {
       // 1. Call POST /auth/login
       const data = await login(email, password);
 
-      // 2. Store the token
+      // 2. Store token
       setToken(data.access_token);
 
-      // 3. Fetch full user profile and store it
-      //    (login response has basic info, /me has everything)
+      // 3. Fetch full profile and store it
       const me = await getMe();
       setStoredUser({
         clients_id: me.clients_id,
@@ -60,7 +40,7 @@ export default function LoginPage() {
         entrepreneur_id: me.entrepreneur_id,
       });
 
-      // 4. Redirect — entrepreneurs go to dashboard, buyers go to products
+      // 4. Redirect based on role
       if (data.is_entrepreneur) {
         router.push("/dashboard");
       } else {
@@ -68,8 +48,6 @@ export default function LoginPage() {
       }
 
     } catch (err) {
-      // The error message comes from FastAPI's detail field
-      // api.ts extracts it for us automatically
       setError(err instanceof Error ? err.message : "Erro ao fazer login.");
     } finally {
       setLoading(false);
@@ -79,8 +57,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-
-        {/* ── Card ──────────────────────────────────────────────────────── */}
         <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
 
           {/* Header */}
@@ -93,15 +69,11 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* ── Form ──────────────────────────────────────────────────────── */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-            {/* Email */}
             <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-foreground"
-              >
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
                 E-mail
               </label>
               <input
@@ -112,24 +84,14 @@ export default function LoginPage() {
                 placeholder="voce@email.com"
                 required
                 autoComplete="email"
-                className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
 
-            {/* Password */}
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-foreground"
-                >
-                  Senha
-                </label>
-                {/* Forgot password — placeholder for later */}
-                <span className="text-xs text-muted-foreground cursor-not-allowed">
-                  Esqueceu a senha?
-                </span>
-              </div>
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
+                Senha
+              </label>
               <input
                 id="password"
                 type="password"
@@ -138,18 +100,16 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+                className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
 
-            {/* ── Error message ────────────────────────────────────────────── */}
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
                 <p className="text-destructive text-sm">{error}</p>
               </div>
             )}
 
-            {/* ── Submit button ─────────────────────────────────────────────── */}
             <button
               type="submit"
               disabled={loading}
@@ -159,26 +119,20 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* ── Divider ───────────────────────────────────────────────────── */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-border" />
             <span className="text-xs text-muted-foreground">ou</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
-          {/* ── Register link ─────────────────────────────────────────────── */}
           <p className="text-center text-sm text-muted-foreground">
             Ainda não tem conta?{" "}
-            <Link
-              href="/register"
-              className="text-primary font-medium hover:underline"
-            >
+            <Link href="/register" className="text-primary font-medium hover:underline">
               Cadastre-se grátis
             </Link>
           </p>
         </div>
 
-        {/* ── Back to products ──────────────────────────────────────────────── */}
         <p className="text-center mt-4">
           <Link
             href="/products"

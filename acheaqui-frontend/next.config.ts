@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+
+  // ── Image domains ──────────────────────────────────────────────────────────
+  // Add Cloudinary so product images load correctly
   images: {
     remotePatterns: [
       {
@@ -12,9 +15,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "github.com",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com", // ← Cloudinary product images
+      },
     ],
   },
+
+  // ── Security headers ───────────────────────────────────────────────────────
   async headers() {
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
     return [
       {
         source: "/:path*",
@@ -22,10 +34,6 @@ const nextConfig: NextConfig = {
           {
             key: "X-DNS-Prefetch-Control",
             value: "on",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
           },
           {
             key: "X-Content-Type-Options",
@@ -48,9 +56,20 @@ const nextConfig: NextConfig = {
             value: "camera=(), microphone=(), geolocation=()",
           },
           {
+            // ── Content Security Policy ──────────────────────────────────
+            // connect-src now includes your FastAPI API URL
+            // In production replace 127.0.0.1:8000 with your real API domain
             key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; connect-src 'self' https://api.hubapi.com https://track.customer.io; frame-src 'self' https://www.youtube-nocookie.com; frame-ancestors 'none';",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' https: data: blob:",
+              "font-src 'self'",
+              `connect-src 'self' ${apiUrl} http://localhost:8000 http://127.0.0.1:8000`,
+              "frame-src 'self' https://www.youtube-nocookie.com",
+              "frame-ancestors 'none'",
+            ].join("; "),
           },
         ],
       },

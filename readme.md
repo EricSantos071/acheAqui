@@ -170,3 +170,9 @@ Step 2 — Optional entrepreneur registration
 - Fix onto products folder, lib folder with api files directing to localhost instead of 127.0.0.1 (Linux things...)
 - Fix applied onto main.py so CORS can accept the number version of API :v
 
+21/04/26
+- Fixing API Block part 2...
+next.config.ts file was directing somewhere else, redirected to localhost for now
+This guy also loads Cloudinary images... essentially border patrol lol (Partially fixed haha)
+- After the change above, fixing the page.tsx of login and products, because of aggresive redirects and converting products to full client-side
+
