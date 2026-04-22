@@ -77,9 +77,12 @@ export async function registerEntrepreneur(data: {
   return handleResponse(res);
 }
 
-export async function getMe(): Promise<CurrentUser> {
+// Updated getMe — accepts optional token parameter
+export async function getMe(token?: string): Promise<CurrentUser> {
   const res = await fetch(`${API}/me`, {
-    headers: authHeader(),
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : authHeader(),
   });
   return handleResponse<CurrentUser>(res);
 }

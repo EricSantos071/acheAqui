@@ -176,3 +176,11 @@ next.config.ts file was directing somewhere else, redirected to localhost for no
 This guy also loads Cloudinary images... essentially border patrol lol (Partially fixed haha)
 - After the change above, fixing the page.tsx of login and products, because of aggresive redirects and converting products to full client-side
 
+22/04/26
+- Login/Registering works... but the tokens are not refreshing, thanks React for that and its useEffect on mount it is only working once, time to fix that, because layout.tsx is only mounting it once, by building an AuthContext to tell the navbar to refresh
+    - Also updated layout to wrap up AuthContext, Navbar, Login/Success and Register pages too
+    - api.ts has to be altered as well... (Otherwise I need a token authorization lol, this update at line 80 it access the optional token parameter)
+    - Line 28 on login page, to pass the token directly
+    - Line 75 on register page, same thing
+-
+

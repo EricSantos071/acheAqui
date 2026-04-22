@@ -1,34 +1,22 @@
 "use client";
 
 // ── src/components/Navbar.tsx ─────────────────────────────────────────────────
-// Top navigation bar — visible on every page.
-// "use client" because it reads localStorage for auth state.
-//
-// Shows different links depending on login state:
-//   Logged out → Login, Cadastrar
-//   Logged in  → My account, Cart, Logout
-//   Entrepreneur → also shows Dashboard link
+// Now uses AuthContext instead of reading localStorage directly.
+// This means it updates instantly when login/logout happens anywhere in the app.
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getStoredUser, clearToken } from "@/lib/auth";
-import type { CurrentUser } from "@/types";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const [user, setUser] = useState<CurrentUser | null>(null);
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
-  // Read user from localStorage on mount
-  // We do this in useEffect because localStorage is not available on the server
-  useEffect(() => {
-    setUser(getStoredUser());
-  }, []);
-
   function handleLogout() {
-    clearToken();
-    setUser(null);
+    logout();
+    setMenuOpen(false);
     router.push("/");
   }
 
@@ -37,7 +25,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* ── Logo ────────────────────────────────────────────────────── */}
+          {/* Logo */}
           <Link
             href="/"
             className="text-xl font-semibold text-primary hover:opacity-80 transition-opacity"
@@ -45,7 +33,7 @@ export default function Navbar() {
             AcheAqui
           </Link>
 
-          {/* ── Desktop nav links ────────────────────────────────────────── */}
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6">
             <Link
               href="/products"
@@ -59,7 +47,6 @@ export default function Navbar() {
             >
               Lojas
             </Link>
-
             {user?.is_entrepreneur && (
               <Link
                 href="/dashboard"
@@ -70,24 +57,19 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* ── Desktop auth buttons ─────────────────────────────────────── */}
+          {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                {/* Cart */}
                 <Link
                   href="/carrinho"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   🛒 Carrinho
                 </Link>
-
-                {/* User greeting */}
                 <span className="text-sm text-foreground font-medium">
                   Olá, {user.first_name}
                 </span>
-
-                {/* Logout */}
                 <button
                   onClick={handleLogout}
                   className="text-sm px-4 py-2 rounded-lg border border-border hover:bg-accent transition-colors"
@@ -113,20 +95,13 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ── Mobile menu button ───────────────────────────────────────── */}
+          {/* Mobile menu button */}
           <button
             className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               {menuOpen ? (
                 <path d="M18 6L6 18M6 6l12 12" />
               ) : (
@@ -136,62 +111,35 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* ── Mobile menu ──────────────────────────────────────────────────── */}
+        {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden py-4 border-t border-border flex flex-col gap-3">
-            <Link
-              href="/products"
-              className="text-sm text-muted-foreground hover:text-foreground py-2"
-              onClick={() => setMenuOpen(false)}
-            >
+            <Link href="/products" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
               Produtos
             </Link>
-            <Link
-              href="/lojas"
-              className="text-sm text-muted-foreground hover:text-foreground py-2"
-              onClick={() => setMenuOpen(false)}
-            >
+            <Link href="/lojas" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
               Lojas
             </Link>
             {user?.is_entrepreneur && (
-              <Link
-                href="/dashboard"
-                className="text-sm text-muted-foreground hover:text-foreground py-2"
-                onClick={() => setMenuOpen(false)}
-              >
+              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
                 Dashboard
               </Link>
             )}
             {user ? (
               <>
-                <Link
-                  href="/carrinho"
-                  className="text-sm text-muted-foreground hover:text-foreground py-2"
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link href="/carrinho" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
                   🛒 Carrinho
                 </Link>
-                <button
-                  onClick={() => { handleLogout(); setMenuOpen(false); }}
-                  className="text-sm text-left text-muted-foreground hover:text-foreground py-2"
-                >
+                <button onClick={handleLogout} className="text-sm text-left text-muted-foreground hover:text-foreground py-2">
                   Sair ({user.first_name})
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="text-sm text-muted-foreground hover:text-foreground py-2"
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
                   Entrar
                 </Link>
-                <Link
-                  href="/register"
-                  className="text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground text-center"
-                  onClick={() => setMenuOpen(false)}
-                >
+                <Link href="/register" className="text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground text-center" onClick={() => setMenuOpen(false)}>
                   Cadastrar
                 </Link>
               </>
