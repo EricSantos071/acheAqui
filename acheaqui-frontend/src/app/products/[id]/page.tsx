@@ -178,7 +178,11 @@ export default function ProductDetailPage() {
       setTimeout(() => setCartSuccess(false), 3000);
     } catch (err) {
       setCartError(
-        err instanceof Error ? err.message : "Erro ao adicionar ao carrinho."
+        err instanceof Error
+          ? err.message
+          : typeof err === "string"
+          ? err
+          : "Erro ao adicionar ao carrinho."
       );
     } finally {
       setCartLoading(false);

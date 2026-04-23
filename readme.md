@@ -194,3 +194,19 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
     - Remove button — the trash icon calls DELETE /ordering/cart/{id} and removes the item from state immediately — no page reload needed.
     - Sticky order summary — the right column stays visible as you scroll through a long cart. Shows itemized breakdown and total. The "frete calculado no checkout" message sets expectations correctly.
     - Empty cart state — if cart is empty shows a friendly message with a link back to products instead of a blank page.
+
+23/04/26
+- Cart when adding a product to id shows [object Object] error... Time to fix it:
+    - Changing models/ordering.py: router takes client_id from current_user automatically, but CartBase still requires it in the request body. Fix in models/ordering.py commenting the client out to fix the 422 error.
+    - [object Object] fix: line 181 of page in product id to see if displays a text
+- Cart has been fixed! Onto the ckeckout page:
+    1. Show cart summary (what they're buying)
+    2. Collect delivery address
+    3. Collect payment method (Pix, Credit Card, Boleto)
+    4. On confirm:
+    → POST /ordering/orders    → creates the order
+    → POST /ordering/payments  → creates the payment record
+    → POST /ordering/delivery  → creates delivery record
+    → Redirect to /success
+    5. Protected — redirect to /login if not logged in
+

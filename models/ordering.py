@@ -9,10 +9,11 @@ from decimal import Decimal
 # ══════════════════════════════════════════════════════════════════════════════
 
 class CartBase(BaseModel):
+    """Only what the user sends — client_id comes from token"""
     quantity: int
     total_value: Decimal
     product_id: int             # FK → inventory.products
-    client_id: int              # FK → registers.clients
+    # NO client_id: int here — router adds it from the JWT token
 
 
 class CartCreate(CartBase):
