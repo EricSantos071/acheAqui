@@ -188,4 +188,9 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
     - Add to cart — if not logged in, button says "Entrar para comprar" and redirects to login. If logged in, calls POST /ordering/cart and shows a green confirmation.
     - Star picker — interactive stars for the review form, hover effect included.
     - Reviews — shows all reviews with date and stars. Form only appears when logged in — guests see a "login to review" prompt instead.
-
+- Page for Cart has been made:
+    - Enriched cart items — the cart API returns only IDs and values. We immediately fetch each product's details in parallel with Promise.all so names and images appear alongside quantities.
+    - Quantity controls — +/− buttons call PUT /ordering/cart/{id} with the new quantity AND recalculated total_value. The item grays out while updating so you can't double-click.
+    - Remove button — the trash icon calls DELETE /ordering/cart/{id} and removes the item from state immediately — no page reload needed.
+    - Sticky order summary — the right column stays visible as you scroll through a long cart. Shows itemized breakdown and total. The "frete calculado no checkout" message sets expectations correctly.
+    - Empty cart state — if cart is empty shows a friendly message with a link back to products instead of a blank page.
