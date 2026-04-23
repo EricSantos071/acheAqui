@@ -182,5 +182,10 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
     - api.ts has to be altered as well... (Otherwise I need a token authorization lol, this update at line 80 it access the optional token parameter)
     - Line 28 on login page, to pass the token directly
     - Line 75 on register page, same thing
--
+- Page for Products id created at app! What does it do:
+    -   Image gallery — shows the main image large, with clickable thumbnails below if there are multiple images. Falls back to a placeholder SVG if no images uploaded.
+    - Quantity picker — + and − buttons capped at in_stock max so you can't order more than available.
+    - Add to cart — if not logged in, button says "Entrar para comprar" and redirects to login. If logged in, calls POST /ordering/cart and shows a green confirmation.
+    - Star picker — interactive stars for the review form, hover effect included.
+    - Reviews — shows all reviews with date and stars. Form only appears when logged in — guests see a "login to review" prompt instead.
 
