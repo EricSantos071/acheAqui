@@ -209,4 +209,6 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
     → POST /ordering/delivery  → creates delivery record
     → Redirect to /success
     5. Protected — redirect to /login if not logged in
+- Also created success page, where it redirects after a successful purchase
+    - [object Object] haunts me (Same setError fix applied)
 
