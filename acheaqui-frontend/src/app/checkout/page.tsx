@@ -92,7 +92,7 @@ export default function CheckoutPage() {
   }, [user]);
 
   // ── Calculate total ────────────────────────────────────────────────────────
-  const subtotal = items.reduce((sum, item) => sum + item.total_value, 0);
+  const subtotal = items.reduce((sum, item) => sum + Number(item.total_value), 0);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", {
@@ -119,7 +119,7 @@ export default function CheckoutPage() {
     try {
       // 1. Create order
       const order = await createOrder({
-        order_total: Math.round(subtotal),
+        order_total: Math.round(Number(subtotal)),
         status: false,  // false = pending
       });
 

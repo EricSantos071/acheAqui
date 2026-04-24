@@ -212,3 +212,13 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
 - Also created success page, where it redirects after a successful purchase
     - [object Object] haunts me (Same setError fix applied)
 
+24/04/26
+- Line 95 change on checkout to convert to a Number forcefully on checkout page, also line 115 on cart page to not sum words lol
+- Line 122 on checkout as well to ensure the order total is a number
+- ordering.py was the culprit, replacing key fields to enter the success screen:
+    Specifically:
+        OrderCreate — standalone class, no Base inheritance, no client_id
+        PaymentCreate — same, no client_id, no order_id confusion
+        DeliveryCreate — removed client_id, router adds it from token
+        All Response models — keep client_id since DB returns it
+

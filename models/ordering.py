@@ -9,11 +9,10 @@ from decimal import Decimal
 # ══════════════════════════════════════════════════════════════════════════════
 
 class CartBase(BaseModel):
-    """Only what the user sends — client_id comes from token"""
     quantity: int
     total_value: Decimal
-    product_id: int             # FK → inventory.products
-    # NO client_id: int here — router adds it from the JWT token
+    product_id: int
+    # NO client_id — router adds it from JWT token
 
 
 class CartCreate(CartBase):
@@ -31,6 +30,7 @@ class CartUpdate(BaseModel):
 
 class CartResponse(CartBase):
     cart_id: int
+    client_id: int              # included in response but not in create
 
     class Config:
         from_attributes = True
@@ -40,26 +40,27 @@ class CartResponse(CartBase):
 # ORDERS
 # ══════════════════════════════════════════════════════════════════════════════
 
-class OrderBase(BaseModel):
+class OrderCreate(BaseModel):
+    """
+    Used for POST /ordering/orders.
+    client_id comes from JWT token in the router — not from request body.
+    """
     order_total: int
-    status: bool = False        # False = pending, True = completed
-    client_id: int              # FK → registers.clients
-
-
-class OrderCreate(OrderBase):
-    """Used for POST /ordering/orders"""
-    pass
+    status: bool = False
 
 
 class OrderUpdate(BaseModel):
     """Used for PUT /ordering/orders/{id}"""
     order_total: Optional[int] = None
     status: Optional[bool] = None
-    client_id: Optional[int] = None
 
 
-class OrderResponse(OrderBase):
+class OrderResponse(BaseModel):
+    """Used for GET responses — includes all fields."""
     orders_id: int
+    order_total: int
+    status: bool
+    client_id: int
 
     class Config:
         from_attributes = True
@@ -69,17 +70,16 @@ class OrderResponse(OrderBase):
 # PAYMENTS
 # ══════════════════════════════════════════════════════════════════════════════
 
-class PaymentBase(BaseModel):
-    payment_method: str         # e.g. "pix", "credit_card", "boleto"
+class PaymentCreate(BaseModel):
+    """
+    Used for POST /ordering/payments.
+    client_id comes from JWT token in the router — not from request body.
+    """
+    payment_method: str
     payment_date: datetime
-    status: bool = False        # False = pending, True = confirmed
-    client_id: int              # FK → registers.clients
-    order_id: int               # FK → ordering_system.orders
-
-
-class PaymentCreate(PaymentBase):
-    """Used for POST /ordering/payments"""
-    pass
+    status: bool = False
+    order_id: int
+    # NO client_id — router adds it from JWT token
 
 
 class PaymentUpdate(BaseModel):
@@ -87,12 +87,17 @@ class PaymentUpdate(BaseModel):
     payment_method: Optional[str] = None
     payment_date: Optional[datetime] = None
     status: Optional[bool] = None
-    client_id: Optional[int] = None
     order_id: Optional[int] = None
 
 
-class PaymentResponse(PaymentBase):
+class PaymentResponse(BaseModel):
+    """Used for GET responses — includes all fields."""
     payments_id: int
+    payment_method: str
+    payment_date: datetime
+    status: bool
+    client_id: int
+    order_id: int
 
     class Config:
         from_attributes = True
@@ -105,13 +110,13 @@ class PaymentResponse(PaymentBase):
 class PromoBase(BaseModel):
     promo_name: str
     description: str
-    promo_value: Decimal        # e.g. 15.00 for R$15 off
+    promo_value: Decimal
     start_date: datetime
     end_date: datetime
-    status: bool = True         # True = active
-    entrepreneur_id: int        # FK → registers.entrepreneurs
-    product_id: int             # FK → inventory.products
-    category_id: int            # FK → inventory.category
+    status: bool = True
+    entrepreneur_id: int
+    product_id: int
+    category_id: int
 
 
 class PromoCreate(PromoBase):
@@ -144,8 +149,8 @@ class PromoResponse(PromoBase):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class TransactionBase(BaseModel):
-    transaction_type: str       # e.g. "sale", "refund", "chargeback"
-    payment_id: int             # FK → ordering_system.payments
+    transaction_type: str
+    payment_id: int
 
 
 class TransactionCreate(TransactionBase):
@@ -171,9 +176,9 @@ class TransactionResponse(TransactionBase):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class DeliveryBase(BaseModel):
-    client_id: int              # FK → registers.clients
-    order_id: int               # FK → ordering_system.orders
-    cart_id: int                # FK → ordering_system.cart
+    order_id: int
+    cart_id: int
+    # NO client_id — router adds it from JWT token
 
 
 class DeliveryCreate(DeliveryBase):
@@ -183,13 +188,16 @@ class DeliveryCreate(DeliveryBase):
 
 class DeliveryUpdate(BaseModel):
     """Used for PUT /ordering/delivery/{id}"""
-    client_id: Optional[int] = None
     order_id: Optional[int] = None
     cart_id: Optional[int] = None
 
 
-class DeliveryResponse(DeliveryBase):
+class DeliveryResponse(BaseModel):
+    """Used for GET responses — includes all fields."""
     delivery_id: int
+    client_id: int
+    order_id: int
+    cart_id: int
 
     class Config:
         from_attributes = True
