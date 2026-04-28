@@ -225,3 +225,21 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
 27/04/26
 - I broke checkout page because I have two handlesubmits at the same time :v Now fixed with just one present with the functions to remove the cart items after purchased.
 
+--- Progress Check - TODO ---
+Week 1 → Homepage + Store profile (visual impact)
+Week 2 → Polish all pages + fix remaining buttons
+Week 3 → Testing + bug fixes
+Week 4 → Final deployment prep + presentation
+
+28/04/26
+- Added Dashboard for entrepreneurs only (TO ADD a enterprise registration after registering Physical person)
+- Added the real homepage (src/app/page.tsx), what does it do:
+    - Hero — gradient background with decorative blurred circles, search bar that redirects to /products?search=query, two CTAs, and trust indicators. The search hits your existing filter endpoint directly.
+    - Categories — fetches real categories from API, maps names to emojis automatically. Falls back to 6 static categories if the API returns empty (useful when DB is fresh). Each card links to /products?category_id=X.
+    - Featured products — fetches 8 available products and renders them using the same ProductCard component from the products page — consistent look, no duplicate code.
+    - Entrepreneur CTA — full-width terracotta section with 3 benefit cards. Links to /register.
+    - Newsletter — simple email form, shows success message after submit. Placeholder for now — connecting to a real email service (Mailchimp, Resend) is a post-delivery task.
+- Creative categories annoy me lol, gonna make them fixed to avoid 500 errors happening ;-; what is being fixed:
+
+
+
