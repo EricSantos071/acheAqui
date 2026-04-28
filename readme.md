@@ -222,3 +222,6 @@ This guy also loads Cloudinary images... essentially border patrol lol (Partiall
         DeliveryCreate — removed client_id, router adds it from token
         All Response models — keep client_id since DB returns it
 
+27/04/26
+- I broke checkout page because I have two handlesubmits at the same time :v Now fixed with just one present with the functions to remove the cart items after purchased.
+
