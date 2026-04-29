@@ -177,14 +177,14 @@ export async function getCategories(): Promise<PaginatedResponse<Category>> {
   return handleResponse<PaginatedResponse<Category>>(res);
 }
 
-export async function createCategory(category_name: string): Promise<Category> {
-  const res = await fetch(`${API}/inventory/category`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeader() },
-    body: JSON.stringify({ category_name }),
-  });
-  return handleResponse<Category>(res);
-}
+// export async function createCategory(category_name: string): Promise<Category> {
+//   const res = await fetch(`${API}/inventory/category`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json", ...authHeader() },
+//     body: JSON.stringify({ category_name }),
+//   });
+//   return handleResponse<Category>(res);
+// }
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ORDERING — CART

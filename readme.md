@@ -240,6 +240,12 @@ Week 4 → Final deployment prep + presentation
     - Entrepreneur CTA — full-width terracotta section with 3 benefit cards. Links to /register.
     - Newsletter — simple email form, shows success message after submit. Placeholder for now — connecting to a real email service (Mailchimp, Resend) is a post-delivery task.
 - Creative categories annoy me lol, gonna make them fixed to avoid 500 errors happening ;-; what is being fixed:
+    - Created 12 Fixed Categories on DB
+    - Modified routers/inventory.py adding Admin Key to POST / inv / category
+
+29/04/26
+- Modified inventory.py in routers to remove response_model=list[CategoryResponse] from there (line 28)
+    - It worked!!! Pydantic tried to validate a dict as a list — that's a type mismatch. Instead of returning a nice error it crashed with a 500 because the validation happens after the DB query succeeds, inside FastAPI's response serialization layer.
 
 
 

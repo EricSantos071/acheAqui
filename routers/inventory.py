@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Header
 from psycopg.rows import dict_row
 from decimal import Decimal
 from typing import Optional
-import psycopg
+import psycopg, os
 
 from database import get_db
 from auth import get_current_user, get_current_entrepreneur
@@ -25,7 +25,7 @@ MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 # CATEGORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router.get("/category", response_model=list[CategoryResponse])
+@router.get("/category")
 async def get_categories(
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
     search: Optional[str] = Query(None, description="Filter by category name"),
@@ -57,8 +57,11 @@ async def get_categories(
 async def create_category(
     category: CategoryCreate,
     conn: psycopg.AsyncConnection = Depends(get_db("inventory")),
-    current_user: dict = Depends(get_current_entrepreneur)
+    current_user: dict = Depends(get_current_entrepreneur),
+    x_admin_key: str = Header(..., description="Admin key required")
 ):
+    if x_admin_key != os.getenv("ADMIN_KEY"):
+        raise HTTPException(status_code=403, detail="Not authorized.")
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
