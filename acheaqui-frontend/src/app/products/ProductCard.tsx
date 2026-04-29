@@ -98,12 +98,19 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Price + stock */}
           <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
             <span className="text-primary font-semibold text-base">
-              {formattedPrice}
+              {formattedPrice}    
             </span>
+              <Link
+                href={`/loja/${product.entrepreneur_id}`}
+                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Ver loja →
+              </Link>
             {isAvailable && (
               <span className="text-muted-foreground text-xs">
                 {product.in_stock} disponíveis
-              </span>
+              </span>             
             )}
           </div>
         </div>

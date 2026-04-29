@@ -246,6 +246,11 @@ Week 4 → Final deployment prep + presentation
 29/04/26
 - Modified inventory.py in routers to remove response_model=list[CategoryResponse] from there (line 28)
     - It worked!!! Pydantic tried to validate a dict as a list — that's a type mismatch. Instead of returning a nice error it crashed with a 500 because the validation happens after the DB query succeeds, inside FastAPI's response serialization layer.
-
+- Created Store's page file, what it does:
+    - Store header — gradient banner, store avatar with emoji, verified badge when status=true, phone contact, member since date, and three stats (products count, avg rating, review count).
+    - Tabs — Products and Reviews tabs switch between the two views without page reload.
+    - Products tab — uses the same ProductCard component from the products page. Filtered by entrepreneur_id so only their products show.
+    - Reviews tab — fetches reviews from up to 5 of their products in parallel and combines them. Shows a max of 10 reviews to avoid overwhelming the page.
+- Updated ProductCard.tsx to go to the store advertiser of the product (Lines 102 to 108 added)
 
 
