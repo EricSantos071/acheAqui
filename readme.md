@@ -251,6 +251,9 @@ Week 4 → Final deployment prep + presentation
     - Tabs — Products and Reviews tabs switch between the two views without page reload.
     - Products tab — uses the same ProductCard component from the products page. Filtered by entrepreneur_id so only their products show.
     - Reviews tab — fetches reviews from up to 5 of their products in parallel and combines them. Shows a max of 10 reviews to avoid overwhelming the page.
-- Updated ProductCard.tsx to go to the store advertiser of the product (Lines 102 to 108 added)
+- Updated ProductCard.tsx to go to the store advertiser of the product
+    - Did a whole link replacement because it was composing the whole div, redirecting it to the image and name, and the see store now is split from them :D
+    - Change to apply to backend and front eventually: Add a field to the Entrepreneur create a name for their store
+ 
 
 

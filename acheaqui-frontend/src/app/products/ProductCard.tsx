@@ -34,13 +34,14 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isAvailable = product.status && product.in_stock > 0;
 
   return (
-    <Link
-      href={`/products/${product.product_id}`}
-      className="group block"
-    >
+    
       <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col">
 
         {/* ── Product image ──────────────────────────────────────────────── */}
+      <Link
+        href={`/products/${product.product_id}`}
+        className="group block"
+      >
         <div className="relative aspect-square bg-muted overflow-hidden">
           {product.image_url ? (
             <Image
@@ -81,14 +82,20 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
         </div>
+      </Link>
 
         {/* ── Product info ───────────────────────────────────────────────── */}
         <div className="p-4 flex flex-col gap-2 flex-1">
 
           {/* Name */}
+          <Link
+            href={`/products/${product.product_id}`}
+            className="group block"
+          >
           <h3 className="font-medium text-foreground text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
             {product.product_name}
           </h3>
+          </Link>
 
           {/* Description */}
           <p className="text-muted-foreground text-xs line-clamp-2 flex-1">
@@ -115,6 +122,5 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </div>
-    </Link>
   );
 }
