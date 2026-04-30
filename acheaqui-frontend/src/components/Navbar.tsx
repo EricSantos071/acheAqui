@@ -42,7 +42,7 @@ export default function Navbar() {
               Produtos
             </Link>
             <Link
-              href="/lojas"
+              href="/loja"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Lojas
@@ -117,7 +117,7 @@ export default function Navbar() {
             <Link href="/products" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
               Produtos
             </Link>
-            <Link href="/lojas" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
+            <Link href="/loja" className="text-sm text-muted-foreground hover:text-foreground py-2" onClick={() => setMenuOpen(false)}>
               Lojas
             </Link>
             {user?.is_entrepreneur && (

@@ -255,5 +255,14 @@ Week 4 → Final deployment prep + presentation
     - Did a whole link replacement because it was composing the whole div, redirecting it to the image and name, and the see store now is split from them :D
     - Change to apply to backend and front eventually: Add a field to the Entrepreneur create a name for their store
  
+30/04/26
+- All stores in the website page list to add, done in api.ts Enrepreneurs List
+- Page for Store's list created, what each of them do:
+    - Store cards — each card shows a gradient banner, store avatar emoji, verified badge, phone number, product count and member since date. Clicking navigates to /loja/{id}.
+    - Product count — fetches GET /inventory/products?entrepreneur_id=X&limit=1 for each store. We only need total from the response so limit=1 keeps it fast — one tiny request per store instead of loading all products.
+    - Search — filters client-side by phone or CNPJ since the entrepreneurs list is small. No API call needed on each keystroke.
+    - Empty states — if no stores exist shows a "Seja o primeiro" CTA. If search returns nothing shows a clear filter button.
+    - Bottom CTA — when stores exist, a subtle "Quer ter sua loja aqui?" card at the bottom nudges new entrepreneurs to register.
+    - Small tweak into /loja in Footer/Navbar components because of an "s" lol
 
 

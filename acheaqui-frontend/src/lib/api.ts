@@ -316,3 +316,18 @@ export async function getEntrepreneur(entrepreneur_id: number) {
   const res = await fetch(`${API}/registers/entrepreneurs/${entrepreneur_id}`);
   return handleResponse(res);
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Store Pagination — ENTREPRENEUR
+// ══════════════════════════════════════════════════════════════════════════════
+
+export async function getEntrepreneurs(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<{ data: Entrepreneur[]; total: number; pages: number }> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", params.page.toString());
+  if (params?.limit) query.set("limit", params.limit.toString());
+  const res = await fetch(`${API}/registers/entrepreneurs?${query.toString()}`);
+  return handleResponse(res);
+}
