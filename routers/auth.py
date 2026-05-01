@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from psycopg.rows import dict_row
 from pydantic import BaseModel
+from typing import Optional
 import psycopg
 
 from database import get_db
@@ -96,6 +97,7 @@ async def register(
 class EntrepreneurRegister(BaseModel):
     doc_cnpj: str
     phone: str
+    store_name: Optional[str] = None
 
 
 @router.post("/register/entrepreneur", status_code=200)
@@ -139,11 +141,11 @@ async def register_entrepreneur(
             # Create entrepreneur record
             await cur.execute(
                 """
-                INSERT INTO entrepreneurs (doc_cnpj, phone, status)
-                VALUES (%s, %s, %s)
+                INSERT INTO entrepreneurs (doc_cnpj, phone, status, store_name)
+                VALUES (%s, %s, %s, %s)
                 RETURNING *;
                 """,
-                (data.doc_cnpj, data.phone, True)
+                (data.doc_cnpj, data.phone, True, data.store_name)
             )
             entrepreneur = await cur.fetchone()
 

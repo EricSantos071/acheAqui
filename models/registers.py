@@ -50,6 +50,7 @@ class EntrepreneurBase(BaseModel):
     doc_cnpj: str
     phone: str
     status: bool = True
+    store_name: Optional[str] = None
 
 
 class EntrepreneurCreate(EntrepreneurBase):

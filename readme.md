@@ -264,5 +264,9 @@ Week 4 → Final deployment prep + presentation
     - Empty states — if no stores exist shows a "Seja o primeiro" CTA. If search returns nothing shows a clear filter button.
     - Bottom CTA — when stores exist, a subtle "Quer ter sua loja aqui?" card at the bottom nudges new entrepreneurs to register.
     - Small tweak into /loja in Footer/Navbar components because of an "s" lol
+- Part 1 Done! Part 2 is on! (Refinements and etc for now)
+    - Updated DB Entrepreneur to register a Store name as well
+    - Updated registers.py in models/ line 53
+    - Updated auth.py in routers/ Lines 143, 144,147,5, 99
 
 
