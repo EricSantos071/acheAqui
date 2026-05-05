@@ -18,6 +18,7 @@ interface Step1Data {
 }
 
 interface Step2Data {
+  store_name: string;
   doc_cnpj: string;
   phone: string;
 }
@@ -37,7 +38,7 @@ export default function RegisterPage() {
   });
 
   const [entrepreneurForm, setEntrepreneurForm] = useState<Step2Data>({
-    doc_cnpj: "", phone: "",
+    store_name: "", doc_cnpj: "", phone: "",
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -103,6 +104,7 @@ export default function RegisterPage() {
       await registerEntrepreneur({
         doc_cnpj: entrepreneurForm.doc_cnpj,
         phone: entrepreneurForm.phone,
+        store_name: entrepreneurForm.store_name || undefined,
       });
 
       const me = await getMe();
@@ -233,6 +235,24 @@ export default function RegisterPage() {
               </div>
 
               <form onSubmit={handleStep2} className="flex flex-col gap-4">
+
+              {/* Store name — new field */}
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="store_name" className="text-sm font-medium text-foreground">
+                    Nome da loja
+                    <span className="text-muted-foreground font-normal ml-1">(aparece publicamente)</span>
+                  </label>
+                  <input
+                    id="store_name"
+                    type="text"
+                    value={entrepreneurForm.store_name}
+                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, store_name: e.target.value }))}
+                    placeholder="Ex: Doces da Mari"
+                    maxLength={100}
+                    className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="doc_cnpj" className="text-sm font-medium text-foreground">CNPJ</label>
                   <input id="doc_cnpj" type="text" value={entrepreneurForm.doc_cnpj} onChange={(e) => setEntrepreneurForm((prev) => ({ ...prev, doc_cnpj: e.target.value }))} placeholder="00.000.000/0001-00" required maxLength={18} className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />

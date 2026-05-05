@@ -54,6 +54,7 @@ export interface Entrepreneur {
   entrepreneurs_id: number;
   doc_cnpj: string;
   phone: string;
+  store_name: string | null;
   status: boolean;
   created_at: string;
   updated_at: string;

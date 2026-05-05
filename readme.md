@@ -267,6 +267,12 @@ Week 4 → Final deployment prep + presentation
 - Part 1 Done! Part 2 is on! (Refinements and etc for now)
     - Updated DB Entrepreneur to register a Store name as well
     - Updated registers.py in models/ line 53
-    - Updated auth.py in routers/ Lines 143, 144,147,5, 99
+    - Updated auth.py in routers/ Lines 143, 144, 147, 5, 99
+
+04/05/26
+- Time for the updates and refinements
+    types/index.ts -> Including store_name into the equation, line 57
+    register/page.tsx -> Also including store_name there, line 21, 41, 238 to 255
+    loja/page.tsx -> store_name into lines: 54, 68
 
 
