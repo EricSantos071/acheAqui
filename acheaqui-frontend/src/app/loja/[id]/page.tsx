@@ -179,7 +179,7 @@ export default function StoreProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-semibold text-foreground mb-1">
-                Loja #{entrepreneur.entrepreneurs_id}
+                {(entrepreneur as any).store_name ?? `Loja #${entrepreneur.entrepreneurs_id}`}
               </h1>
               <p className="text-sm text-muted-foreground">
                 📞 {entrepreneur.phone}

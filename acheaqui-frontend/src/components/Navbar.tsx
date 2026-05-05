@@ -5,9 +5,33 @@
 // This means it updates instantly when login/logout happens anywhere in the app.
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { getCart } from "@/lib/api";
+
+function CartBadge() {
+  const [count, setCount] = useState(0);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) { setCount(0); return; }
+    getCart()
+      .then((items) => setCount(items.length))
+      .catch(() => setCount(0));
+  }, [user]);
+
+  return (
+    <Link href="/carrinho" className="relative text-sm text-muted-foreground hover:text-foreground transition-colors">
+      🛒 Carrinho
+      {count > 0 && (
+        <span className="absolute -top-2 -right-3 w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-medium">
+          {count}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -61,12 +85,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <Link
-                  href="/carrinho"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  🛒 Carrinho
-                </Link>
+                <CartBadge />
                 <span className="text-sm text-foreground font-medium">
                   Olá, {user.first_name}
                 </span>
