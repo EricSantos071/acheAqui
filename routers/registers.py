@@ -1,10 +1,11 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+from fastapi import APIRouter, Depends, HTTPException, Header, status, UploadFile, File
 from psycopg.rows import dict_row
 import psycopg
 
 from database import get_db
 from auth import get_current_user
+from upload import upload_image, delete_image
 from models.registers import (
     AddressCreate, AddressUpdate, AddressResponse,
     EntrepreneurCreate, EntrepreneurUpdate, EntrepreneurResponse,
@@ -185,6 +186,62 @@ async def update_entrepreneur(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/entrepreneurs/{entrepreneur_id}/upload-profile")
+async def upload_entrepreneur_profile(
+    entrepreneur_id: int,
+    file: UploadFile = File(...),
+    conn: psycopg.AsyncConnection = Depends(get_db("registers")),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload profile picture for entrepreneur."""
+    if current_user["entrepreneur_id"] != entrepreneur_id:
+        raise HTTPException(status_code=403, detail="Not your profile.")
+    
+    file_bytes = await file.read()
+    if len(file_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Max 5MB.")
+    
+    from upload import upload_image
+    url = await upload_image(file_bytes, entrepreneur_id)
+    
+    try:
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "UPDATE entrepreneurs SET profile_picture = %s WHERE entrepreneurs_id = %s RETURNING *;",
+                (url, entrepreneur_id)
+            )
+            return await cur.fetchone()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/entrepreneurs/{entrepreneur_id}/upload-banner")
+async def upload_entrepreneur_banner(
+    entrepreneur_id: int,
+    file: UploadFile = File(...),
+    conn: psycopg.AsyncConnection = Depends(get_db("registers")),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload banner image for entrepreneur."""
+    if current_user["entrepreneur_id"] != entrepreneur_id:
+        raise HTTPException(status_code=403, detail="Not your profile.")
+    
+    file_bytes = await file.read()
+    if len(file_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Max 5MB.")
+    
+    from upload import upload_image
+    url = await upload_image(file_bytes, entrepreneur_id)
+    
+    try:
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "UPDATE entrepreneurs SET banner_image = %s WHERE entrepreneurs_id = %s RETURNING *;",
+                (url, entrepreneur_id)
+            )
+            return await cur.fetchone()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CLIENTS — protected reads and writes

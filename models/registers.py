@@ -51,6 +51,9 @@ class EntrepreneurBase(BaseModel):
     phone: str
     status: bool = True
     store_name: Optional[str] = None
+    profile_picture: Optional[str] = None
+    banner_image: Optional[str] = None
+    banner_preset: Optional[int] = 1
 
 
 class EntrepreneurCreate(EntrepreneurBase):

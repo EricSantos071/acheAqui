@@ -289,6 +289,15 @@ Week 4 → Final deployment prep + presentation
     cleanest approach for Next.js is a small utility function — no extra library needed
     surgical onChange edits, applied on register page (Import added line 8 and onChange at lines 165, 175, 249, 263)
     - Import mask on checkout page line 15, line 177 onChange applied
-    
+    - New Update! Stores can now show profile pictures, banners and custom backgrounds!
+    models/register.py, lines 54 to 55
+    routers/register.py, lines 188 to 243 to upload images
+    - Banner presets time, new file added as lib/presets.ts
+    Line 56 included on models/registers.py
+    Line 157 to 167 replacing banner div on loja/id/page.tsx
+    dashboard/page.tsx change into lines 272 to 299, selectedPreset const line 38, and import at line 18
+
+
+
 
 

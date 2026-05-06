@@ -15,6 +15,7 @@ import Link from "next/link";
 import { getEntrepreneur, getProducts, getReviews } from "@/lib/api";
 import ProductCard from "@/app/products/ProductCard";
 import type { Product, Review } from "@/types";
+import { BANNER_PRESETS } from "@/lib/presets";
 
 // ── Star display ───────────────────────────────────────────────────────────────
 function Stars({ rating }: { rating: number }) {
@@ -154,7 +155,17 @@ export default function StoreProfilePage() {
       <div className="bg-card border border-border rounded-2xl overflow-hidden mb-8">
 
         {/* Banner */}
-        <div className="h-32 bg-gradient-to-br from-accent via-secondary to-primary/20" />
+        <div className={`h-32 ${
+          (entrepreneur as any).banner_image
+            ? ""
+            : BANNER_PRESETS.find(p => p.id === ((entrepreneur as any).banner_preset ?? 1))?.style
+            ?? BANNER_PRESETS[0].style
+        }`}
+          style={(entrepreneur as any).banner_image
+            ? { backgroundImage: `url(${(entrepreneur as any).banner_image})`, backgroundSize: "cover" }
+            : undefined
+          }
+        />
 
         {/* Store info */}
         <div className="px-6 pb-6">

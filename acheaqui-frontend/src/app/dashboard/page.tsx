@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { BANNER_PRESETS } from "@/lib/presets";
 import {
   getProducts,
   getOrders,
@@ -35,6 +36,7 @@ export default function DashboardPage() {
 
   // ── Active tab ─────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<Tab>("overview");
+  const [selectedPreset, setSelectedPreset] = useState(1);
 
   // ── Data state ─────────────────────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([]);
@@ -267,6 +269,35 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground mt-1">{kpi.label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Banner preset selection*/}
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h2 className="font-semibold text-foreground mb-4">
+              Aparência da loja
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Escolha um tema para o banner da sua loja:
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {BANNER_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  className={`h-16 rounded-xl ${preset.style} border-2 transition-colors ${
+                    selectedPreset === preset.id
+                      ? "border-primary shadow-md"
+                      : "border-transparent hover:border-muted-foreground"
+                  }`}
+                  onClick={() => setSelectedPreset(preset.id)}
+                  title={preset.name}
+                />
+              ))}
+            </div>
+            {selectedPreset && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Selecionado: {BANNER_PRESETS.find(p => p.id === selectedPreset)?.name}
+              </p>
+            )}
           </div>
 
           {/* Recent products */}
