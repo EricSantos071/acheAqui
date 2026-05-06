@@ -12,6 +12,7 @@ import {
   removeFromCart,
 } from "@/lib/api";
 import type { CartItem, Product } from "@/types";
+import { maskCEP } from "@/lib/masks";
 
 interface EnrichedCartItem extends CartItem {
   product: Product | null;
@@ -173,7 +174,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-foreground">CEP</label>
-                  <input name="zip_code" type="text" value={address.zip_code} onChange={handleAddress} placeholder="88000-000" required maxLength={9} className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <input name="zip_code" type="text" value={address.zip_code} onChange={(e) => setAddress((p) => ({ ...p, zip_code: maskCEP(e.target.value) }))} placeholder="88000-000" required maxLength={9} className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               </div>
             </div>

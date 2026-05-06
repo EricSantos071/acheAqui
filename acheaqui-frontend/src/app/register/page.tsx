@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { register, registerEntrepreneur, login, getMe } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { maskCPF, maskCNPJ, maskPhone } from "@/lib/masks";
 
 interface Step1Data {
   first_name: string;
@@ -161,7 +162,7 @@ export default function RegisterPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="doc_cpf" className="text-sm font-medium text-foreground">CPF</label>
-                  <input id="doc_cpf" name="doc_cpf" type="text" value={form.doc_cpf} onChange={handleChange} placeholder="000.000.000-00" required maxLength={14} className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <input id="doc_cpf" name="doc_cpf" type="text" value={form.doc_cpf} onChange={(e) => setForm((p) => ({ ...p, doc_cpf: maskCPF(e.target.value) }))} placeholder="000.000.000-00" required maxLength={14} className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -171,7 +172,7 @@ export default function RegisterPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="client_phone" className="text-sm font-medium text-foreground">Telefone</label>
-                  <input id="client_phone" name="client_phone" type="tel" value={form.client_phone} onChange={handleChange} placeholder="(48) 99999-9999" required className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <input id="client_phone" name="client_phone" type="tel" value={form.client_phone} onChange={(e) => setForm((p) => ({ ...p, client_phone: maskPhone(e.target.value) }))} placeholder="(48) 99999-9999" required className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -245,7 +246,7 @@ export default function RegisterPage() {
                     id="doc_cnpj"
                     type="text"
                     value={entrepreneurForm.doc_cnpj}
-                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, doc_cnpj: e.target.value }))}
+                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, doc_cnpj: maskCNPJ(e.target.value) }))}
                     placeholder="00.000.000/0001-00"
                     required
                     maxLength={18}
@@ -259,7 +260,7 @@ export default function RegisterPage() {
                     id="biz_phone"
                     type="tel"
                     value={entrepreneurForm.phone}
-                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, phone: e.target.value }))}
+                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, phone: maskPhone(e.target.value) }))}
                     placeholder="(48) 99999-9999"
                     required
                     className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"

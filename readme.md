@@ -283,4 +283,12 @@ Week 4 → Final deployment prep + presentation
     Updated navbar to navigate to the account page, lines 90 to 92 to a clickable link
     Updated register and loja pages
 
+06/05/26
+- Updates of the day:
+    - Masks for typing addresses and documents, created in lib/masks.ts
+    cleanest approach for Next.js is a small utility function — no extra library needed
+    surgical onChange edits, applied on register page (Import added line 8 and onChange at lines 165, 175, 249, 263)
+    - Import mask on checkout page line 15, line 177 onChange applied
+    
+
 
