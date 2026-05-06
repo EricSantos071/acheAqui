@@ -1,6 +1,4 @@
 // ── src/types/index.ts ────────────────────────────────────────────────────────
-// Shared TypeScript types used across the entire app.
-// These mirror the Pydantic models from the FastAPI backend.
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -54,7 +52,7 @@ export interface Entrepreneur {
   entrepreneurs_id: number;
   doc_cnpj: string;
   phone: string;
-  store_name: string | null;
+  store_name: string | null;   // ← added
   status: boolean;
   created_at: string;
   updated_at: string;
@@ -137,7 +135,6 @@ export interface Review {
 }
 
 // ── Pagination ────────────────────────────────────────────────────────────────
-// All paginated endpoints return this shape
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -145,5 +142,5 @@ export interface PaginatedResponse<T> {
   limit: number;
   total: number;
   pages: number;
-  avg_rating?: number; // only on reviews endpoint
+  avg_rating?: number;
 }

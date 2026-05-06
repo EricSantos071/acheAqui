@@ -279,5 +279,8 @@ Week 4 → Final deployment prep + presentation
 - New Updates today:
     loja/id/page.tsx -> The entrepreneur object now has store_name from the DB — we show it if it exists, fall back to Loja #ID if not. Line 181 to 183
     components/navbar.tsx -> Lines 64 to 69 will import the function starting at Line 11 to 34 - The badge reads the cart count when the user logs in. It won't update in real-time as you add items (that would need a global cart context) but it shows the correct count on page load
+- Added minha-conta for non enterprise users
+    Updated navbar to navigate to the account page, lines 90 to 92 to a clickable link
+    Updated register and loja pages
 
 

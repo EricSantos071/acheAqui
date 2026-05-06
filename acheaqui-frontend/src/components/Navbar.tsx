@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { getCart } from "@/lib/api";
 
+// setCount works tho, even with the error lol
 function CartBadge() {
   const [count, setCount] = useState(0);
   const { user } = useAuth();
@@ -86,9 +87,12 @@ export default function Navbar() {
             {user ? (
               <>
                 <CartBadge />
-                <span className="text-sm text-foreground font-medium">
+                <Link
+                  href="/minha-conta"
+                  className="text-sm text-foreground font-medium hover:text-primary transition-colors"
+                >
                   Olá, {user.first_name}
-                </span>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="text-sm px-4 py-2 rounded-lg border border-border hover:bg-accent transition-colors"

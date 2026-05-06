@@ -60,7 +60,6 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      // 1. Register
       await register({
         first_name: form.first_name,
         last_name: form.last_name,
@@ -71,11 +70,9 @@ export default function RegisterPage() {
         password: form.password,
       });
 
-      // 2. Auto-login
       const loginData = await login(form.email, form.password);
       const me = await getMe(loginData.access_token);
 
-      // 3. Update global auth state — Navbar updates immediately
       loginSuccess(loginData.access_token, {
         clients_id: me.clients_id,
         first_name: me.first_name,
@@ -85,9 +82,7 @@ export default function RegisterPage() {
         entrepreneur_id: null,
       });
 
-      // 4. Move to step 2
       setStep(2);
-
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao cadastrar.");
     } finally {
@@ -118,16 +113,11 @@ export default function RegisterPage() {
       });
 
       router.push("/dashboard");
-
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao cadastrar negócio.");
     } finally {
       setLoading(false);
     }
-  }
-
-  function skipEntrepreneur() {
-    router.push("/products");
   }
 
   return (
@@ -137,16 +127,12 @@ export default function RegisterPage() {
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-3 mb-8">
           <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              1
-            </div>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${step >= 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>1</div>
             <span className="text-sm text-muted-foreground hidden sm:block">Dados pessoais</span>
           </div>
           <div className="w-8 h-px bg-border" />
           <div className="flex items-center gap-2">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${step === 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              2
-            </div>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${step === 2 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>2</div>
             <span className="text-sm text-muted-foreground hidden sm:block">Seu negócio</span>
           </div>
         </div>
@@ -236,7 +222,7 @@ export default function RegisterPage() {
 
               <form onSubmit={handleStep2} className="flex flex-col gap-4">
 
-              {/* Store name — new field */}
+                {/* Store name — new field */}
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="store_name" className="text-sm font-medium text-foreground">
                     Nome da loja
@@ -254,13 +240,30 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="doc_cnpj" className="text-sm font-medium text-foreground">CNPJ</label>
-                  <input id="doc_cnpj" type="text" value={entrepreneurForm.doc_cnpj} onChange={(e) => setEntrepreneurForm((prev) => ({ ...prev, doc_cnpj: e.target.value }))} placeholder="00.000.000/0001-00" required maxLength={18} className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <label htmlFor="doc_cnpj" className="text-sm font-medium text-foreground">CNPJ *</label>
+                  <input
+                    id="doc_cnpj"
+                    type="text"
+                    value={entrepreneurForm.doc_cnpj}
+                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, doc_cnpj: e.target.value }))}
+                    placeholder="00.000.000/0001-00"
+                    required
+                    maxLength={18}
+                    className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="biz_phone" className="text-sm font-medium text-foreground">Telefone do negócio</label>
-                  <input id="biz_phone" type="tel" value={entrepreneurForm.phone} onChange={(e) => setEntrepreneurForm((prev) => ({ ...prev, phone: e.target.value }))} placeholder="(48) 99999-9999" required className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <label htmlFor="biz_phone" className="text-sm font-medium text-foreground">Telefone do negócio *</label>
+                  <input
+                    id="biz_phone"
+                    type="tel"
+                    value={entrepreneurForm.phone}
+                    onChange={(e) => setEntrepreneurForm((p) => ({ ...p, phone: e.target.value }))}
+                    placeholder="(48) 99999-9999"
+                    required
+                    className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
                 </div>
 
                 {error && (
@@ -274,7 +277,10 @@ export default function RegisterPage() {
                 </button>
               </form>
 
-              <button onClick={skipEntrepreneur} className="w-full mt-3 h-10 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+              <button
+                onClick={() => router.push("/products")}
+                className="w-full mt-3 h-10 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              >
                 Agora não — quero só comprar
               </button>
             </>
