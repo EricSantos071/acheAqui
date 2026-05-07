@@ -331,3 +331,28 @@ export async function getEntrepreneurs(params?: {
   const res = await fetch(`${API}/registers/entrepreneurs?${query.toString()}`);
   return handleResponse(res);
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Image sharing helper across the screens
+// ══════════════════════════════════════════════════════════════════════════════
+
+export async function getProductsWithImages(params?: Parameters<typeof getProducts>[0]) {
+  const result = await getProducts(params);
+  
+  // Fetch first image for each product in parallel
+  const withImages = await Promise.all(
+    result.data.map(async (product) => {
+      try {
+        const images = await getProductImages(product.product_id);
+        return {
+          ...product,
+          image_url: images[0]?.image_url ?? undefined,
+        };
+      } catch {
+        return product;
+      }
+    })
+  );
+  
+  return { ...result, data: withImages };
+}

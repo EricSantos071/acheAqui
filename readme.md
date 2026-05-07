@@ -296,8 +296,13 @@ Week 4 → Final deployment prep + presentation
     Line 56 included on models/registers.py
     Line 157 to 167 replacing banner div on loja/id/page.tsx
     dashboard/page.tsx change into lines 272 to 299, selectedPreset const line 38, and import at line 18
+    - Adding the images of the products into other pages too, helper added in api.ts starting at line 335
+    Lines 68 changed as well to getProductWithImage import on ProductsClient page
+    Lines 16 and 42 changed on app page to adapt as well
+    - Adding an edit to SAVE the changes in a store profile after created
+    Lines 246 to 267 added in routers/registers.py, import on line 3 as well
+    Dashboard field addition of a save button (Lines 303 to 309 and the async function Lines 167 to 180)
 
-
-
-
-
+07/05/26
+- Yet again, Dasboard tweaks:
+    Save button was not working for a lack of a import of the store page header, added it and tweaked the save button too

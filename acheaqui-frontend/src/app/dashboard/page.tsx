@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { authHeader } from "@/lib/auth";
 import { BANNER_PRESETS } from "@/lib/presets";
 import {
   getProducts,
@@ -37,6 +38,7 @@ export default function DashboardPage() {
   // ── Active tab ─────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<Tab>("overview");
   const [selectedPreset, setSelectedPreset] = useState(1);
+  const [presetSaved, setPresetSaved] = useState(false);
 
   // ── Data state ─────────────────────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([]);
@@ -161,6 +163,21 @@ export default function DashboardPage() {
       );
     } finally {
       setFormLoading(false);
+    }
+  }
+
+  // ── Save button preset function ──────────────────────────────────────────────────
+  async function handleSaveAppearance() {
+    if (!user?.entrepreneur_id) return;
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/registers/entrepreneurs/${user.entrepreneur_id}/appearance?banner_preset=${selectedPreset}`,
+        { method: "PUT", headers: authHeader() }
+      );
+      setPresetSaved(true);
+      setTimeout(() => setPresetSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -297,6 +314,21 @@ export default function DashboardPage() {
               <p className="text-xs text-muted-foreground mt-2">
                 Selecionado: {BANNER_PRESETS.find(p => p.id === selectedPreset)?.name}
               </p>
+            )}
+          </div>
+
+          {/* Save button of Presets */}
+          <div className="flex items-center gap-3 mt-4">
+            <button
+              onClick={handleSaveAppearance}
+              className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              Salvar aparência
+            </button>
+            {presetSaved && (
+              <span className="text-sm text-green-600 font-medium">
+                ✓ Salvo!
+              </span>
             )}
           </div>
 

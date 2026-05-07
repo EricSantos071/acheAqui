@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import ProductCard, { Product } from "./ProductCard";
+import { getProductsWithImages } from "@/lib/api";
 
 interface Category {
   category_id: number;
@@ -64,9 +65,17 @@ export default function ProductsClient({
       if (minPrice) params.set("min_price", minPrice);
       if (maxPrice) params.set("max_price", maxPrice);
 
-      const res = await fetch(
-        `${API_URL}/inventory/products?${params.toString()}`
-      );
+      const json = await getProductsWithImages({
+        page,
+        limit: LIMIT,
+        status: true,
+        search: search.trim() || undefined,
+        category_id: categoryId ?? undefined,
+        min_price: minPrice ? Number(minPrice) : undefined,
+        max_price: maxPrice ? Number(maxPrice) : undefined,
+      });
+      setData(json);
+      
       if (!res.ok) throw new Error("Failed to fetch products");
       const json = await res.json();
       setData(json);

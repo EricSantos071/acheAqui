@@ -13,7 +13,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getCategories, getProducts } from "@/lib/api";
+import { getCategories, getProductsWithImages } from "@/lib/api";
 import ProductCard from "./products/ProductCard";
 import type { Category, Product } from "@/types";
 
@@ -39,7 +39,7 @@ export default function HomePage() {
       try {
         const [cats, prods] = await Promise.all([
           getCategories(),
-          getProducts({ limit: 8, status: true, page: 1 }),
+          getProductsWithImages({ limit: 8, status: true, page: 1 }),
         ]);
         setCategories(cats.data);
         setFeatured(prods.data);

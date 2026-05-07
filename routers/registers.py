@@ -1,5 +1,6 @@
 import os
 from fastapi import APIRouter, Depends, HTTPException, Header, status, UploadFile, File
+from typing import Optional
 from psycopg.rows import dict_row
 import psycopg
 
@@ -238,6 +239,29 @@ async def upload_entrepreneur_banner(
             await cur.execute(
                 "UPDATE entrepreneurs SET banner_image = %s WHERE entrepreneurs_id = %s RETURNING *;",
                 (url, entrepreneur_id)
+            )
+            return await cur.fetchone()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.put("/entrepreneurs/{entrepreneur_id}/appearance")
+async def update_appearance(
+    entrepreneur_id: int,
+    banner_preset: Optional[int] = None,
+    conn: psycopg.AsyncConnection = Depends(get_db("registers")),
+    current_user: dict = Depends(get_current_user)
+):
+    """Update banner preset for entrepreneur."""
+    if current_user["entrepreneur_id"] != entrepreneur_id:
+        raise HTTPException(status_code=403, detail="Not your profile.")
+    try:
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                """UPDATE entrepreneurs 
+                   SET banner_preset = %s 
+                   WHERE entrepreneurs_id = %s 
+                   RETURNING *;""",
+                (banner_preset, entrepreneur_id)
             )
             return await cur.fetchone()
     except Exception as e:
