@@ -306,3 +306,14 @@ Week 4 → Final deployment prep + presentation
 07/05/26
 - Yet again, Dasboard tweaks:
     Save button was not working for a lack of a import of the store page header, added it and tweaked the save button too
+
+- Major fixes below:
+    - Altering character limits on CPF, CNPJ and CEP stuff because of the masks on database
+    - json defined multiple times in ProductsClient page (Fixing the fetchProducts cons - Line 55 to 72)
+    - Being locked out my website haha, token expires but the Navbar still shows as logged in from localStorage. Add token validation on app startup in src/context/AuthContext.tsx (line 48 to 70)
+    - loja/id not showing product image (Added getProductsWithImages to it replacing getProducts)
+    - Edible profile banner and picture custom after registering (Upload added to api.ts line 319 to 344)
+    Change applied to dashboard page as well:
+    const added lines 42 to 45
+    functions added lines 189 to 217
+    upload buttons added lines 325 to 377

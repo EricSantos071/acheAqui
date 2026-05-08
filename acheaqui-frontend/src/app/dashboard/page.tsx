@@ -25,6 +25,8 @@ import {
   updateProduct,
   deleteProduct,
   uploadProductImage,
+  uploadEntrepreneurProfile,
+  uploadEntrepreneurBanner,
 } from "@/lib/api";
 import type { Product, Order, Category } from "@/types";
 
@@ -39,6 +41,10 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [selectedPreset, setSelectedPreset] = useState(1);
   const [presetSaved, setPresetSaved] = useState(false);
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [uploadingProfile, setUploadingProfile] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
 
   // ── Data state ─────────────────────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([]);
@@ -181,6 +187,37 @@ export default function DashboardPage() {
     }
   }
 
+  // ── Profile and Banner custom preset ──────────────────────────────────────────────────
+  async function handleProfileUpload() {
+    if (!profileFile || !user?.entrepreneur_id) return;
+    setUploadingProfile(true);
+    try {
+      await uploadEntrepreneurProfile(user.entrepreneur_id, profileFile);
+      setProfileFile(null);
+      setPresetSaved(true);
+      setTimeout(() => setPresetSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploadingProfile(false);
+    }
+  }
+
+  async function handleBannerUpload() {
+    if (!bannerFile || !user?.entrepreneur_id) return;
+    setUploadingBanner(true);
+    try {
+      await uploadEntrepreneurBanner(user.entrepreneur_id, bannerFile);
+      setBannerFile(null);
+      setPresetSaved(true);
+      setTimeout(() => setPresetSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploadingBanner(false);
+    }
+  }
+
   // ── Toggle product status ──────────────────────────────────────────────────
   async function handleToggleStatus(product: Product) {
     try {
@@ -286,6 +323,59 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground mt-1">{kpi.label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Profile picture upload */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-border">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground mb-2">
+                Foto de perfil
+              </p>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setProfileFile(e.target.files?.[0] ?? null)}
+                  className="text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primary file:text-primary-foreground hover:file:opacity-90"
+                />
+                {profileFile && (
+                  <button
+                    onClick={handleProfileUpload}
+                    disabled={uploadingProfile}
+                    className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {uploadingProfile ? "Enviando..." : "Salvar foto"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Custom banner upload */}
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground mb-2">
+                Banner personalizado
+              </p>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setBannerFile(e.target.files?.[0] ?? null)}
+                  className="text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primary file:text-primary-foreground hover:file:opacity-90"
+                />
+                {bannerFile && (
+                  <button
+                    onClick={handleBannerUpload}
+                    disabled={uploadingBanner}
+                    className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {uploadingBanner ? "Enviando..." : "Salvar banner"}
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Ou escolha um tema abaixo
+              </p>
+            </div>
           </div>
 
           {/* Banner preset selection*/}

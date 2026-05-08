@@ -317,6 +317,32 @@ export async function getEntrepreneur(entrepreneur_id: number) {
   return handleResponse(res);
 }
 
+export async function uploadEntrepreneurProfile(
+  entrepreneur_id: number,
+  file: File
+): Promise<void> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(
+    `${API}/registers/entrepreneurs/${entrepreneur_id}/upload-profile`,
+    { method: "POST", headers: authHeader(), body: form }
+  );
+  return handleResponse(res);
+}
+
+export async function uploadEntrepreneurBanner(
+  entrepreneur_id: number,
+  file: File
+): Promise<void> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(
+    `${API}/registers/entrepreneurs/${entrepreneur_id}/upload-banner`,
+    { method: "POST", headers: authHeader(), body: form }
+  );
+  return handleResponse(res);
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // Store Pagination — ENTREPRENEUR
 // ══════════════════════════════════════════════════════════════════════════════

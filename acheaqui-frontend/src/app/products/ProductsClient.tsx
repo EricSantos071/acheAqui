@@ -33,7 +33,6 @@ interface ProductsClientProps {
   categories: Category[];
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 const LIMIT = 12; // products per page
 
 export default function ProductsClient({
@@ -55,16 +54,6 @@ export default function ProductsClient({
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.set("page", page.toString());
-      params.set("limit", LIMIT.toString());
-      params.set("status", "true"); // only show available products
-
-      if (search.trim()) params.set("search", search.trim());
-      if (categoryId) params.set("category_id", categoryId.toString());
-      if (minPrice) params.set("min_price", minPrice);
-      if (maxPrice) params.set("max_price", maxPrice);
-
       const json = await getProductsWithImages({
         page,
         limit: LIMIT,
@@ -74,10 +63,6 @@ export default function ProductsClient({
         min_price: minPrice ? Number(minPrice) : undefined,
         max_price: maxPrice ? Number(maxPrice) : undefined,
       });
-      setData(json);
-      
-      if (!res.ok) throw new Error("Failed to fetch products");
-      const json = await res.json();
       setData(json);
     } catch (err) {
       console.error("Error fetching products:", err);

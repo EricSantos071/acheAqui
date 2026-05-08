@@ -21,7 +21,7 @@ import {
   useCallback,
 } from "react";
 import type { CurrentUser } from "@/types";
-import { getStoredUser, clearToken, setStoredUser, setToken } from "@/lib/auth";
+import { getStoredUser, clearToken, setStoredUser, setToken, getToken } from "@/lib/auth";
 
 // ── Context shape ──────────────────────────────────────────────────────────────
 interface AuthContextType {
@@ -47,7 +47,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Read stored user on app startup
   useEffect(() => {
     const stored = getStoredUser();
-    if (stored) setUserState(stored);
+    const token = getToken();
+    if (stored && token) {
+      // Verify token is still valid by calling /me
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => {
+          if (res.ok) {
+            setUserState(stored);
+          } else {
+            // Token expired — clear everything
+            clearToken();
+            setUserState(null);
+          }
+        })
+        .catch(() => {
+          // Network error — keep stored user, don't lock out
+          setUserState(stored);
+        });
+    }
   }, []);
 
   // Update both context state and localStorage together

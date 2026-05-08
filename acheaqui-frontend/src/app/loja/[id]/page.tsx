@@ -12,7 +12,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getEntrepreneur, getProducts, getReviews } from "@/lib/api";
+import { getEntrepreneur, getProducts, getReviews, getProductsWithImages } from "@/lib/api";
 import ProductCard from "@/app/products/ProductCard";
 import type { Product, Review } from "@/types";
 import { BANNER_PRESETS } from "@/lib/presets";
@@ -68,7 +68,7 @@ export default function StoreProfilePage() {
         // Fetch entrepreneur info and their products in parallel
         const [ent, prods] = await Promise.all([
           getEntrepreneur(entrepreneurId),
-          getProducts({
+          getProductsWithImages({
             entrepreneur_id: entrepreneurId,
             status: true,
             limit: 100,
