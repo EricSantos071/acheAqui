@@ -382,3 +382,22 @@ export async function getProductsWithImages(params?: Parameters<typeof getProduc
   
   return { ...result, data: withImages };
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Entrepreneur name update
+// ══════════════════════════════════════════════════════════════════════════════
+
+export async function updateEntrepreneur(
+  entrepreneur_id: number,
+  data: { store_name?: string; phone?: string }
+): Promise<void> {
+  const res = await fetch(
+    `${API}/registers/entrepreneurs/${entrepreneur_id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...authHeader() },
+      body: JSON.stringify(data),
+    }
+  );
+  return handleResponse(res);
+}

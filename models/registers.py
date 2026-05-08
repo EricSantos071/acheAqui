@@ -66,6 +66,7 @@ class EntrepreneurUpdate(BaseModel):
     doc_cnpj: Optional[str] = None
     phone: Optional[str] = None
     status: Optional[bool] = None
+    store_name: Optional[str] = None
 
 
 class EntrepreneurResponse(EntrepreneurBase):

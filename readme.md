@@ -317,3 +317,11 @@ Week 4 → Final deployment prep + presentation
     const added lines 42 to 45
     functions added lines 189 to 217
     upload buttons added lines 325 to 377
+
+08/05/26
+- Hopefully last update lol (for now)
+    Store name changeable even after registration:
+    models/registers.py change on update_entrepreneur field line 69
+    API call added as well, lines 385 to 403
+    Dashboard UI page lines 222 to 238 handler, 48 and 49 consts, 348 to 370 divs
+

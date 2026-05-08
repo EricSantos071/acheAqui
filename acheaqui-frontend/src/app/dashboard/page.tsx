@@ -27,6 +27,7 @@ import {
   uploadProductImage,
   uploadEntrepreneurProfile,
   uploadEntrepreneurBanner,
+  updateEntrepreneur
 } from "@/lib/api";
 import type { Product, Order, Category } from "@/types";
 
@@ -45,6 +46,8 @@ export default function DashboardPage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [storeName, setStoreName] = useState("");
+  const [savingName, setSavingName] = useState(false);
 
   // ── Data state ─────────────────────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([]);
@@ -218,6 +221,23 @@ export default function DashboardPage() {
     }
   }
 
+  // ── Store name update handler ──────────────────────────────────────────────────
+  async function handleSaveStoreName() {
+    if (!user?.entrepreneur_id || !storeName.trim()) return;
+    setSavingName(true);
+    try {
+      await updateEntrepreneur(user.entrepreneur_id, {
+        store_name: storeName.trim()
+      });
+      setPresetSaved(true);
+      setTimeout(() => setPresetSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingName(false);
+    }
+  }
+
   // ── Toggle product status ──────────────────────────────────────────────────
   async function handleToggleStatus(product: Product) {
     try {
@@ -323,6 +343,30 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground mt-1">{kpi.label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Store name upgrade */}
+          <div className="mb-6 pb-6 border-b border-border">
+            <p className="text-sm font-medium text-foreground mb-2">
+              Nome da loja
+            </p>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                placeholder="Ex: Doces da Mari"
+                maxLength={100}
+                className="flex-1 h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <button
+                onClick={handleSaveStoreName}
+                disabled={savingName || !storeName.trim()}
+                className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {savingName ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
           </div>
 
           {/* Profile picture upload */}
