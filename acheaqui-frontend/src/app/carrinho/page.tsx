@@ -15,7 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getCart, getProduct, updateCartItem, removeFromCart } from "@/lib/api";
+import { getCart, getProduct, updateCartItem, removeFromCart, getProductImages } from "@/lib/api";
 import type { CartItem, Product } from "@/types";
 
 // ── Cart item enriched with product details ────────────────────────────────────
@@ -52,10 +52,13 @@ export default function CartPage() {
         const enriched = await Promise.all(
           cartItems.map(async (item) => {
             try {
-              const product = await getProduct(item.product_id);
-              return { ...item, product };
+              const [product, images] = await Promise.all([
+                getProduct(item.product_id),
+                getProductImages(item.product_id),
+              ]);
+              return { ...item, product, image_url: images[0]?.image_url };
             } catch {
-              return { ...item, product: null };
+              return { ...item, product: null, image_url: undefined };
             }
           })
         );
@@ -199,8 +202,16 @@ export default function CartPage() {
                   href={`/products/${item.product_id}`}
                   className="flex-shrink-0"
                 >
-                  <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden relative">
-                    {item.product ? (
+                  <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden relative flex-shrink-0">
+                    {item.image_url ? (
+                      <Image
+                        src={item.image_url}
+                        alt={item.product?.product_name ?? "Produto"}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                           <rect width="18" height="18" x="3" y="3" rx="2" />
@@ -208,8 +219,6 @@ export default function CartPage() {
                           <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                         </svg>
                       </div>
-                    ) : (
-                      <div className="w-full h-full bg-muted" />
                     )}
                   </div>
                 </Link>

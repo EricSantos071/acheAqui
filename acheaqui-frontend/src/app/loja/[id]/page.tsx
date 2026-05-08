@@ -48,8 +48,12 @@ export default function StoreProfilePage() {
     entrepreneurs_id: number;
     doc_cnpj: string;
     phone: string;
+    store_name: string | null;
     status: boolean;
     created_at: string;
+    profile_picture: string | null;   // ← add
+    banner_image: string | null;       // ← add
+    banner_preset: number | null;      // ← add
   } | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -148,6 +152,14 @@ export default function StoreProfilePage() {
     );
   }
 
+  // ── Clear Banner Handler ──────────────────────────────────────────────────────────────
+  async function handleClearBanner() {
+    if (!user?.entrepreneur_id) return;
+    await updateEntrepreneur(user.entrepreneur_id, { banner_image: null });
+    setPresetSaved(true);
+    setTimeout(() => setPresetSaved(false), 3000);
+  }
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
@@ -156,14 +168,18 @@ export default function StoreProfilePage() {
 
         {/* Banner */}
         <div className={`h-32 ${
-          (entrepreneur as any).banner_image
-            ? ""
-            : BANNER_PRESETS.find(p => p.id === ((entrepreneur as any).banner_preset ?? 1))?.style
-            ?? BANNER_PRESETS[0].style
-        }`}
-          style={(entrepreneur as any).banner_image
-            ? { backgroundImage: `url(${(entrepreneur as any).banner_image})`, backgroundSize: "cover" }
-            : undefined
+            entrepreneur.banner_image
+              ? ""
+              : BANNER_PRESETS.find(p => p.id === (entrepreneur.banner_preset ?? 1))?.style ?? BANNER_PRESETS[0].style
+          }`}
+          style={
+            entrepreneur.banner_image
+              ? {
+                  backgroundImage: `url(${entrepreneur.banner_image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : undefined
           }
         />
 
@@ -172,8 +188,20 @@ export default function StoreProfilePage() {
           <div className="flex items-end justify-between -mt-8 mb-4">
 
             {/* Avatar */}
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold border-4 border-card shadow-sm">
-              🏪
+            <div className="w-16 h-16 rounded-2xl border-4 border-card shadow-sm overflow-hidden flex-shrink-0">
+              {entrepreneur.profile_picture ? (
+                <Image
+                  src={entrepreneur.profile_picture}
+                  alt="Foto da loja"
+                  width={64}
+                  height={64}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                  🏪
+                </div>
+              )}
             </div>
 
             {/* Verified badge */}

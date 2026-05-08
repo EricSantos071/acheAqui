@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import ProductCard, { Product } from "./ProductCard";
-import { getProductsWithImages } from "@/lib/api";
+import { getProductsWithImages, getCategories } from "@/lib/api";
 
 interface Category {
   category_id: number;
@@ -45,6 +45,7 @@ export default function ProductsClient({
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [page, setPage] = useState(1);
+  const [localCategories, setLocalCategories] = useState(categories);
 
   // ── Data state ─────────────────────────────────────────────────────────────
   const [data, setData] = useState<ApiResponse>(initialData);
@@ -75,6 +76,13 @@ export default function ProductsClient({
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Add useEffect to fetch categories client-side
+  useEffect(() => {
+    getCategories()
+      .then((res) => setLocalCategories(res.data))
+      .catch(console.error);
+  }, []);
 
   // Reset to page 1 when filters change
   const handleFilterChange = () => setPage(1);
@@ -127,7 +135,7 @@ export default function ProductsClient({
             className="w-full h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">Todas</option>
-            {categories.map((cat) => (
+            {localCategories.map((cat) => (
               <option key={cat.category_id} value={cat.category_id}>
                 {cat.category_name}
               </option>

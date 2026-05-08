@@ -325,3 +325,13 @@ Week 4 → Final deployment prep + presentation
     API call added as well, lines 385 to 403
     Dashboard UI page lines 222 to 238 handler, 48 and 49 consts, 348 to 370 divs
 
+09/05/26
+- Hopefully the last update (deja vu, i know, so consider it a 2.0 version)
+    - Categories only showing "Todos", change applied to fetch empty arrays, before it was getting props, ProductsClient.tsx
+    * 422 error when adding a review in a product: analytics.py (To review later lol)
+    - Stock count not updating after purchase: added a refresh const to handleAddToCart on products/id/page
+    - Cart page not showing product image: Same fix applied into other fields to fetch getProductImages too
+    - Profile picture not showing on store page, updating state type on loja/id/page, same changes related to banner also applied here
+    * Fix 7 onwards to go
+
+

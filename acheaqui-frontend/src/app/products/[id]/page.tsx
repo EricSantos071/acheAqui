@@ -175,6 +175,8 @@ export default function ProductDetailPage() {
         total_value: product.price * quantity,
       });
       setCartSuccess(true);
+      const refreshed = await getProduct(productId);
+      setProduct(refreshed);
       setTimeout(() => setCartSuccess(false), 3000);
     } catch (err) {
       setCartError(
