@@ -340,5 +340,10 @@ Week 4 → Final deployment prep + presentation
     - PDF Receipt printing/saving, added library to the success page;
     - TS hates requires lol, changed to import instead
 
+12/05/26
+- Back into fixing these fields:
+    - Remove custom banner preset, line 172 in routers/registers.py: if v is not None filters out null entirely. We need to explicitly allow nullable fields through so they can be set to NULL in the DB.
+    - Reviews field...
+
 
 

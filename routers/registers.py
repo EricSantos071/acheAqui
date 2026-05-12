@@ -168,7 +168,8 @@ async def update_entrepreneur(
     if current_user["entrepreneur_id"] != entrepreneur_id:
         raise HTTPException(status_code=403, detail="You can only update your own business.")
     try:
-        fields = {k: v for k, v in entrepreneur.model_dump().items() if v is not None}
+        fields = fields = {k: v for k, v in entrepreneur.model_dump().items() 
+                            if v is not None or k in ("banner_image", "profile_picture", "store_name")}
         if not fields:
             raise HTTPException(status_code=400, detail="No fields provided to update.")
         set_clause = ", ".join(f"{k} = %s" for k in fields)
