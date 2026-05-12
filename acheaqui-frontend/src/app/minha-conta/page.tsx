@@ -168,7 +168,7 @@ export default function MinhaContaPage() {
                     Quer começar a vender no AcheAqui?
                   </p>
                   <Link
-                    href="/register"
+                    href="/register-negocio"
                     className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-2"
                   >
                     🏪 Registrar meu negócio

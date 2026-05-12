@@ -8,6 +8,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
+import jsPDF from "jspdf";
 
 // ── Payment method display info ────────────────────────────────────────────────
 const METHOD_INFO: Record<string, { label: string; instruction: string; icon: string }> = {
@@ -44,6 +45,21 @@ function SuccessContent() {
     }).format(Number(price));
   };
 
+  function downloadReceipt() {
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.text("AcheAqui — Comprovante de Pedido", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Pedido #${orderId}`, 20, 40);
+    doc.text(`Total: ${formatPrice(total)}`, 20, 50);
+    doc.text(`Pagamento: ${methodInfo.label}`, 20, 60);
+    doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 20, 70);
+    doc.text("Obrigado por apoiar o comércio local!", 20, 90);
+
+    doc.save(`comprovante-pedido-${orderId}.pdf`);
+  }
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-lg text-center">
@@ -73,6 +89,14 @@ function SuccessContent() {
 
         {/* ── Order details card ────────────────────────────────────────── */}
         <div className="bg-card border border-border rounded-2xl p-6 mb-6 text-left">
+
+          {/* Download Receipt button */}
+          <button
+            onClick={downloadReceipt}
+            className="w-full h-10 rounded-xl border border-border text-sm text-foreground hover:bg-accent transition-colors flex items-center justify-center gap-2 mb-4"
+          >
+            📄 Baixar comprovante PDF
+          </button>
 
           {/* Order number */}
           {orderId && (

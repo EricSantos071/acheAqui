@@ -12,10 +12,12 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getEntrepreneur, getProducts, getReviews, getProductsWithImages } from "@/lib/api";
 import ProductCard from "@/app/products/ProductCard";
 import type { Product, Review } from "@/types";
 import { BANNER_PRESETS } from "@/lib/presets";
+import { QRCodeSVG } from "qrcode.react";
 
 // ── Star display ───────────────────────────────────────────────────────────────
 function Stars({ rating }: { rating: number }) {
@@ -60,6 +62,10 @@ export default function StoreProfilePage() {
   const [avgRating, setAvgRating] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const storeUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/loja/${entrepreneurId}`
+    : "";
 
   // ── Active tab ─────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<"products" | "reviews">("products");
@@ -151,14 +157,6 @@ export default function StoreProfilePage() {
       </div>
     );
   }
-
-  // ── Clear Banner Handler ──────────────────────────────────────────────────────────────
-  async function handleClearBanner() {
-    if (!user?.entrepreneur_id) return;
-    await updateEntrepreneur(user.entrepreneur_id, { banner_image: null });
-    setPresetSaved(true);
-    setTimeout(() => setPresetSaved(false), 3000);
-  }
   
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -215,10 +213,18 @@ export default function StoreProfilePage() {
             )}
           </div>
 
+          {/* Share button */}
+          <button
+            onClick={() => setShowQR(!showQR)}
+            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full hover:bg-accent transition-colors"
+          >
+            📱 Compartilhar
+          </button>
+
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-semibold text-foreground mb-1">
-                {(entrepreneur as any).store_name ?? `Loja #${entrepreneur.entrepreneurs_id}`}
+                {entrepreneur.store_name ?? `Loja #${entrepreneur.entrepreneurs_id}`}
               </h1>
               <p className="text-sm text-muted-foreground">
                 📞 {entrepreneur.phone}
@@ -266,6 +272,45 @@ export default function StoreProfilePage() {
             </div>
           )}
         </div>
+        {showQR && (
+          <div
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowQR(false)}
+          >
+            <div
+              className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center gap-4 max-w-xs w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="font-semibold text-foreground">
+                Compartilhar loja
+              </h3>
+              <QRCodeSVG
+                value={storeUrl}
+                size={200}
+                bgColor="transparent"
+                fgColor="currentColor"
+                className="text-foreground"
+              />
+              <p className="text-xs text-muted-foreground text-center break-all">
+                {storeUrl}
+              </p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(storeUrl);
+                }}
+                className="h-9 px-4 rounded-xl border border-border text-sm text-foreground hover:bg-accent transition-colors w-full"
+              >
+                📋 Copiar link
+              </button>
+              <button
+                onClick={() => setShowQR(false)}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Tabs ──────────────────────────────────────────────────────────── */}

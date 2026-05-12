@@ -17,7 +17,10 @@ class ReviewBase(BaseModel):
 
 class ReviewCreate(ReviewBase):
     """Used for POST /analytics/reviews"""
-    pass
+    rating: int = Field(..., ge=1, le=5)
+    comment: str
+    review_date: date
+    product_id: int
 
 
 class ReviewUpdate(BaseModel):

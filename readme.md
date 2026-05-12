@@ -328,10 +328,17 @@ Week 4 → Final deployment prep + presentation
 09/05/26
 - Hopefully the last update (deja vu, i know, so consider it a 2.0 version)
     - Categories only showing "Todos", change applied to fetch empty arrays, before it was getting props, ProductsClient.tsx
-    * 422 error when adding a review in a product: analytics.py (To review later lol)
+    - Removed pass from ReviewCreate, as now we have things to insert
+    - On sote id page there was a code in the wrong place haha
     - Stock count not updating after purchase: added a refresh const to handleAddToCart on products/id/page
     - Cart page not showing product image: Same fix applied into other fields to fetch getProductImages too
     - Profile picture not showing on store page, updating state type on loja/id/page, same changes related to banner also applied here
-    * Fix 7 onwards to go
+    - Change to register a business after registration done to guide to the register business page instead, new page created for that if done later;
+    - A link to guide to the user store in dashboard has been added;
+    - Seller info update to show store's name and guide to the page;
+    - QR Code sharing, installed a library for it, to alter loja id page later;
+    - PDF Receipt printing/saving, added library to the success page;
+    - TS hates requires lol, changed to import instead
+
 
 

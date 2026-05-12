@@ -67,6 +67,7 @@ class EntrepreneurUpdate(BaseModel):
     phone: Optional[str] = None
     status: Optional[bool] = None
     store_name: Optional[str] = None
+    banner_image: Optional[str] = None
 
 
 class EntrepreneurResponse(EntrepreneurBase):

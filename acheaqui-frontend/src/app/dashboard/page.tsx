@@ -221,6 +221,13 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleClearBanner() {
+    if (!user?.entrepreneur_id) return;
+    await updateEntrepreneur(user.entrepreneur_id, { banner_image: null });
+    setPresetSaved(true);
+    setTimeout(() => setPresetSaved(false), 3000);
+  }
+
   // ── Store name update handler ──────────────────────────────────────────────────
   async function handleSaveStoreName() {
     if (!user?.entrepreneur_id || !storeName.trim()) return;
@@ -299,6 +306,14 @@ export default function DashboardPage() {
         >
           + Novo produto
         </button>
+        {user.entrepreneur_id && (
+          <Link
+            href={`/loja/${user.entrepreneur_id}`}
+            className="h-10 px-4 rounded-xl border border-border text-sm text-foreground hover:bg-accent transition-colors hidden sm:flex items-center gap-2"
+          >
+            🏪 Ver minha loja
+          </Link>
+        )}
       </div>
 
       {/* ── Tabs ──────────────────────────────────────────────────────────── */}
@@ -459,6 +474,15 @@ export default function DashboardPage() {
             >
               Salvar aparência
             </button>
+
+            {/* Clear custom banner — only shows if a custom banner exists */}
+            <button
+              onClick={handleClearBanner}
+              className="h-9 px-4 rounded-xl border border-border text-sm text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+            >
+              Remover banner personalizado
+            </button>
+
             {presetSaved && (
               <span className="text-sm text-green-600 font-medium">
                 ✓ Salvo!

@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
   const [images, setImages] = useState<ProductImage[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [avgRating, setAvgRating] = useState<number | null>(null);
-  const [seller, setSeller] = useState<{ doc_cnpj: string; phone: string } | null>(null);
+  const [seller, setSeller] = useState<{ doc_cnpj: string; phone: string; store_name?: string; } | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -439,14 +439,17 @@ export default function ProductDetailPage() {
 
           {/* Seller info */}
           {seller && (
-            <div className="bg-muted rounded-xl p-4 text-sm">
+            <Link
+              href={`/loja/${product.entrepreneur_id}`}
+              className="bg-muted rounded-xl p-4 text-sm block hover:bg-accent transition-colors"
+            >
               <p className="font-medium text-foreground mb-1">
-                Vendido por empreendedor local
+                {(seller as any).store_name ?? "Empreendedor local"}
               </p>
-              <p className="text-muted-foreground">
-                Contato: {seller.phone}
+              <p className="text-muted-foreground text-xs">
+                📞 {seller.phone} · Ver loja →
               </p>
-            </div>
+            </Link>
           )}
         </div>
       </div>
