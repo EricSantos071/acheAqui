@@ -12,7 +12,7 @@ class ReviewBase(BaseModel):
     comment: str
     review_date: date
     product_id: int             # FK → inventory.products
-    client_id: int              # FK → registers.clients
+    #client_id: int              # FK → registers.clients
 
 
 class ReviewCreate(ReviewBase):

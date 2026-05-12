@@ -132,6 +132,7 @@ export interface Review {
   review_date: string;
   product_id: number;
   client_id: number;
+  client_display_name?: string;
 }
 
 // ── Pagination ────────────────────────────────────────────────────────────────

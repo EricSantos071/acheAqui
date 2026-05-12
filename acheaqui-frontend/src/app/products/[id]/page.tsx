@@ -347,7 +347,7 @@ export default function ProductDetailPage() {
                   {avgRating.toFixed(1)} ({reviews.length} avaliação
                   {reviews.length !== 1 ? "ões" : ""})
                 </span>
-              </div>
+              </div>             
             )}
           </div>
 
@@ -444,7 +444,7 @@ export default function ProductDetailPage() {
               className="bg-muted rounded-xl p-4 text-sm block hover:bg-accent transition-colors"
             >
               <p className="font-medium text-foreground mb-1">
-                {(seller as any).store_name ?? "Empreendedor local"}
+                {seller.store_name ?? "Empreendedor local"}
               </p>
               <p className="text-muted-foreground text-xs">
                 📞 {seller.phone} · Ver loja →
@@ -541,6 +541,9 @@ export default function ProductDetailPage() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <Stars rating={review.rating} />
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    👤 {review.client_display_name ?? "Cliente"}
+                  </p>
                   <span className="text-xs text-muted-foreground">
                     {new Date(review.review_date).toLocaleDateString("pt-BR")}
                   </span>

@@ -380,6 +380,9 @@ export default function StoreProfilePage() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Stars rating={review.rating} />
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      👤 {review.client_display_name ?? "Cliente"}
+                    </p>
                     <span className="text-xs text-muted-foreground">
                       {new Date(review.review_date).toLocaleDateString("pt-BR")}
                     </span>

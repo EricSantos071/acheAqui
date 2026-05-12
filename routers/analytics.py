@@ -52,9 +52,12 @@ async def get_reviews(
         async with conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 f"""
-                SELECT * FROM reviews
+                SELECT r.*, 
+                    c.first_name || ' ' || LEFT(c.last_name, 1) || '.' as client_display_name
+                FROM reviews r
+                LEFT JOIN registers.clients c ON r.client_id = c.clients_id
                 {where}
-                ORDER BY reviews_id DESC
+                ORDER BY r.reviews_id DESC
                 LIMIT %s OFFSET %s;
                 """,
                 values

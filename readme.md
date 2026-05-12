@@ -343,7 +343,7 @@ Week 4 → Final deployment prep + presentation
 12/05/26
 - Back into fixing these fields:
     - Remove custom banner preset, line 172 in routers/registers.py: if v is not None filters out null entirely. We need to explicitly allow nullable fields through so they can be set to NULL in the DB.
-    - Reviews field...
+    - Reviews field... removed client_id cuz call conflict in analytic model, added client first name and first letter of surname for privacy
 
 
 
