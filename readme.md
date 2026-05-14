@@ -1,349 +1,754 @@
-CEDUP Project - Ache Aqui - Projeto Integrador
+# AcheAqui — Projeto Integrador
 
-13/03
-- Created Python venv and it's packages (FastAPI and Uvicorn)
+A marketplace platform built during the CEDUP Projeto Integrador.
 
-To link the database:
-- Installing collected packages on (venv): psycopg2-binary, greenlet, SQLAlchemy, sqlmodel, asyncpg (for the FastAPI Operations)
-- https://medium.com/@shahpranshu27/connecting-fastapi-to-a-database-using-postgresql-and-sqlmodel-beginner-friendly-guide-52b5aabe6ac3 (Second step made on main.py)
+Built with:
 
-** 16/03
-- Changed to Streamlit, Pandas, sqlalquemy (Uvicorn cound't find the Schemas lol) (AI Helped here cuz too dumb lol)
-- Test was a success, it found my tables with the schemas
+* FastAPI
+* PostgreSQL
+* Next.js
+* Docker
+* Cloudinary
+* TypeScript
 
-20/03/26
- - FastAPI usage to link existing Postgre database (using psycopg)
+This README also works as a development journal documenting the project's evolution, architecture decisions, bugs, fixes, redesigns, and deployment process.
 
-21/03/26
- - I asked Claude to help on databse.py :v
- Added .env file to store sensitive info
+---
 
-25/03/26
- - Updated databse and tested /docs, connection was a success
- - Continuing the following: Post/Put/Delete ; User Authentication ; File Upload ; Filtering and Pagination
- - Created directories: Models (Pydantic models for schemas) and Routers (Endpoints for the schemas)
- - Optimized database.py to only get the DB dependecy and the pool
- - Now main.py takes care of the entry point, FastAPI app, middleware registering, import routers and pool lifespan
- - __init__.py on models and routers directories : empty files that tell Python "this folder is a package you can import from."
- - Now the 4 routers take care of importing get_db from database.py, instead of it handling it all
+# 📌 Current Status
 
-26/03/26
- - Creating Pydantic properties on /models
- - 3 Class Pattern per table: Base(Holds shared fields) Create(extends for POST requests), Response(Adds DB fields for GET Responses).
- - Redone the /models files because of me doing Schroedinger's Keys (SpiderMan points at FK and PK being the same lol)
-    - What changed from the previous version
-        Every model now reflects the real DB structure exactly. The key additions per schema:
-        registers — ClientBase now requires address_id and has optional entrepreneur_id. AddressBase and EntrepreneurBase use str for CPF, CNPJ, phone and ZIP. All three tables now have Update models too.
-        inventory — ProductBase now requires entrepreneur_id and optional category_id. ProductImageBase now requires product_id. All tables have Update models.
-        ordering — Every table now has its FK columns: cart has product_id + client_id, orders has client_id, payments has client_id + order_id, promos has all three FKs, transactions has payment_id, and delivery now has real fields instead of being empty.
-        analytics — ReviewBase now has product_id + client_id.
-- Time for the GET/POST/PUT now (Changing routers dir files):
-    - Updated Inventory and testing on Database
+## ✅ Completed
 
-27/03/26
-- Routers test solo on Inventory no good, updated the rest of the routers too (Redoing test as 1.1.1)
-    - Also updated the database, forgot to add AutoIncrementing PKs and FKs (Keys hate me lol)
-    - I forgot the NOW() on timestamps to auto upgrade :v (Reediting db again lol)
-    - Creating /assets/images to test local uploaded images onto Uvicorn
-- CRUD Test with Claude steps on POST were a success (Still gotta improve the Jason Web Token before moving on)
+* Authentication system
+* Product & inventory system
+* Cart & checkout flow
+* Entrepreneur dashboards
+* Store pages
+* Image uploads with Cloudinary
+* Dockerization
+* Filtering & pagination
+* JWT authorization
 
-30/03/26
-- Time for the authentication login/register process
-- Installed python jose for cryptography and hashing
-- auth file as the engine room(root) (User logs, gets token, gets approved, enter the place)
-- Updated main.py to register the auth router - Testing new registering
-    - Self note: USE bcrypt 4.0.1 ... anything above it bugs the auth stuff :v
+## 🚧 In Progress
 
-31/03/26
-- Updating main.py temporarly to get the authentication button to show up (Succesful tests!)
-- Updating dependencies and registration points (Only logged clients/entrepreneurs do what they are supposed to do) (Protect Key routes with Filtering), modded auth.py and routers files updated too
-    - Inventory — category/product/image writes require get_current_entrepreneur. Product PUT/DELETE also verify the entrepreneur owns that specific product before allowing changes.
-    - Ordering — cart, orders, payments and delivery are fully scoped to the logged-in client. GET /ordering/orders no longer returns all orders — only yours. Same for cart, payments and delivery. client_id is always taken from the token, never from the request body.
-    - Registers — /clients/me replaces /clients/{id} for self-service. Clients can only edit and delete their own account. Entrepreneur PUT verifies you own that business record.
-    - Analytics — reviews are public to read but require login to write. PUT/DELETE verify you wrote the review.
-    - New endpoint — POST /auth/register/entrepreneur lets a logged-in client register their business in one step.
+* UI refinements
+* Final testing
+* Deployment polish
 
-01/04/26
-- Filtering and pagination time!
-    - Products — the richest filter set since it's the core of your marketplace. Search hits both product_name AND description at once using OR. Price range uses >= and <= so you can set just one side (min_price=50 alone works fine).
-    - Orders/Payments — scoped to the logged-in client first, then filtered. A client can never see another client's orders even if they guess the right filters.
-    - Promos — public, filterable by status, category and product. The frontend can use status=true to show only active promos.
-    - Reviews — has one bonus field in the response: avg_rating. When the frontend loads a product page it can hit /analytics/reviews?product_id=1 and get both the review list AND the average rating in one request.
+## 📋 Planned
 
-- Cloudinary registration and code modded to upload product images
-    - The flow will be: frontend picks a file → sends it to your API → API uploads to Cloudinary → gets back a URL → saves that URL to product_images table → returns the full image record.
-- Creation of upload.py for the images (Cloudinary engine at root)
-    - upload.py — the Cloudinary engine. upload_image() takes raw bytes, uploads them organized into folders by product (acheaqui/products/{product_id}/), auto-compresses, auto-converts to WebP for browsers that support it, and caps dimensions at 1200x1200. delete_image() extracts the Cloudinary public_id from the stored URL and removes it from the cloud when you delete from the DB.
-    - New endpoint — POST /inventory/products/{product_id}/upload — takes a file directly, validates type and size before touching Cloudinary, checks ownership, uploads, saves the URL to product_images and returns the full record.
-    - DELETE is now smarter — it deletes from both Cloudinary AND the DB in the right order, keeping your storage clean.
+* Real-time cart updates
+* Email integrations
+* Final production deployment
 
-07/04/26
-- What are we doing? Docking! (Interestellar theme plays)
+---
 
-08/04/26
-- For docking we use: docker login -u "username"
-- docker compose up -d --build (Use -d otherwise the current terminal locks on and u need to open another one)
-- Step by Step on how to do it e.e
-# 1. Bump the version (follow the pattern: major.minor.patch)
-#    patch = bug fix (1.0.0 → 1.0.1)
-#    minor = new feature (1.0.0 → 1.1.0)
-#    major = breaking change (1.0.0 → 2.0.0)
+# 🧠 Dev Log
 
-# 2. Build with new version
+---
+
+# Phase 1 — Backend Foundation
+
+## 13/03/26 — Initial Backend Setup
+
+### Backend
+
+* Created Python virtual environment
+* Installed FastAPI and Uvicorn
+
+### Database Connection
+
+* Installed:
+
+  * psycopg2-binary
+  * greenlet
+  * SQLAlchemy
+  * sqlmodel
+  * asyncpg
+
+### References
+
+* PostgreSQL + FastAPI integration guide:
+
+  * [https://medium.com/@shahpranshu27/connecting-fastapi-to-a-database-using-postgresql-and-sqlmodel-beginner-friendly-guide-52b5aabe6ac3](https://medium.com/@shahpranshu27/connecting-fastapi-to-a-database-using-postgresql-and-sqlmodel-beginner-friendly-guide-52b5aabe6ac3)
+
+---
+
+## 16/03/26 — Streamlit Experiment
+
+### Changes
+
+* Switched temporarily to:
+
+  * Streamlit
+  * Pandas
+  * SQLAlchemy
+
+> Uvicorn couldn't find the schemas lol
+
+### Results
+
+* Database schema detection worked successfully
+* Tables loaded correctly
+
+---
+
+## 20/03/26 — PostgreSQL Integration
+
+### Backend
+
+* FastAPI successfully connected to the existing PostgreSQL database using psycopg
+
+---
+
+## 21/03/26 — Environment & Database Improvements
+
+### Improvements
+
+* Added `.env` support for sensitive variables
+* Refactored `database.py`
+
+> Claude helped on `database.py` :v
+
+---
+
+## 25/03/26 — Router & Model Structure
+
+### Backend
+
+* Tested `/docs` successfully
+* Connection confirmed working
+
+### Planned Features
+
+* POST / PUT / DELETE
+* User authentication
+* File uploads
+* Filtering & pagination
+
+### New Structure
+
+Created:
+
+* `/models` → Pydantic schemas
+* `/routers` → API endpoints
+
+### Refactors
+
+* `database.py` now only handles DB dependency and pool
+* `main.py` now handles:
+
+  * FastAPI app creation
+  * middleware registration
+  * router imports
+  * lifespan management
+
+### Notes
+
+* Added `__init__.py` files so Python treats folders as packages
+* Routers now import `get_db` directly instead of centralizing everything
+
+---
+
+## 26/03/26 — Pydantic Models & Schema Rework
+
+### Models
+
+* Started creating Pydantic models inside `/models`
+
+### Pattern Used
+
+Each table follows:
+
+* `Base` → shared fields
+* `Create` → POST requests
+* `Response` → GET responses
+
+### Major Refactor
+
+Redid the models after fixing FK/PK confusion.
+
+> Schroedinger's Keys moment 💀
+
+### Database Alignment
+
+All schemas now reflect the real database structure.
+
+#### Registers
+
+* `ClientBase` requires `address_id`
+* Optional `entrepreneur_id`
+* CPF, CNPJ, phone and ZIP converted to `str`
+* Added Update models
+
+#### Inventory
+
+* `ProductBase` requires `entrepreneur_id`
+* Optional `category_id`
+* `ProductImageBase` requires `product_id`
+
+#### Ordering
+
+Added FK support for:
+
+* cart
+* orders
+* payments
+* promos
+* transactions
+* delivery
+
+#### Analytics
+
+* `ReviewBase` now includes:
+
+  * `product_id`
+  * `client_id`
+
+### Next Step
+
+* CRUD endpoints
+* Router updates
+
+---
+
+## 27/03/26 — CRUD Tests & Upload Setup
+
+### Backend
+
+* Updated all routers after inventory tests failed
+* Refactored database keys and auto increments
+* Added automatic timestamps using `NOW()`
+
+> Forgot the timestamps again :v
+
+### Upload Tests
+
+Created:
+
+* `/assets/images`
+
+### Results
+
+* CRUD tests succeeded with Claude-assisted POST setup
+
+### Pending
+
+* JWT improvements
+
+---
+
+## 30/03/26 — Authentication System
+
+### Authentication
+
+* Started login/register flow
+* Installed `python-jose`
+
+### Structure
+
+* `auth.py` became the authentication engine
+
+### Notes
+
+* Updated `main.py` to register auth router
+
+> USE bcrypt 4.0.1 — newer versions break auth 😭
+
+---
+
+## 31/03/26 — Route Protection & Authorization
+
+### Authentication
+
+* Protected routes with token validation
+* Added entrepreneur ownership verification
+
+### Security Improvements
+
+#### Inventory
+
+* Product/category/image writes require entrepreneur authentication
+* PUT/DELETE validates ownership
+
+#### Ordering
+
+* Orders scoped to logged-in clients only
+* `client_id` always comes from token
+
+#### Registers
+
+* `/clients/me` replaces direct ID access
+* Entrepreneurs can only edit their own business
+
+#### Analytics
+
+* Reviews are public to read
+* Writing/editing reviews requires authentication
+
+### New Endpoint
+
+* `POST /auth/register/entrepreneur`
+
+---
+
+# Phase 2 — Marketplace Features
+
+## 01/04/26 — Filtering, Pagination & Cloudinary
+
+### Filtering System
+
+#### Products
+
+* Search supports:
+
+  * product name
+  * description
+* Added price range filters
+
+#### Orders & Payments
+
+* Client-scoped filtering
+
+#### Promos
+
+* Public filtering by:
+
+  * status
+  * category
+  * product
+
+#### Reviews
+
+* Added `avg_rating` to responses
+
+### Cloudinary Integration
+
+Implemented image upload flow:
+
+1. Frontend uploads image
+2. API uploads to Cloudinary
+3. URL stored in DB
+4. Full image record returned
+
+### Upload System
+
+Created `upload.py`
+
+Features:
+
+* Product-based folders
+* WebP optimization
+* Compression
+* Dimension limiting
+* Smart deletion syncing DB + Cloudinary
+
+### New Endpoint
+
+* `POST /inventory/products/{product_id}/upload`
+
+---
+
+## 07/04/26 — Docker Time
+
+> Interstellar docking theme starts playing 🚀
+
+---
+
+## 08/04/26 — Docker Workflow
+
+### Docker Commands
+
+```bash
+# Login
+docker login -u "username"
+
+# Build & run
+docker compose up -d --build
+```
+
+### Versioning Notes
+
+```bash
+# patch = bug fix
+# minor = new feature
+# major = breaking change
+
+# Build
 docker build -t yourdockerhubusername/acheaqui-api:1.0.1 .
 
-# 3. Push new version
+# Push
 docker push yourdockerhubusername/acheaqui-api:1.0.1
 
-# 4. Update latest tag
+# Latest tag
 docker tag yourdockerhubusername/acheaqui-api:1.0.1 yourdockerhubusername/acheaqui-api:latest
 docker push yourdockerhubusername/acheaqui-api:latest
+```
 
-09/04/26
-- Found a Front-end Open Source to use! Here: https://github.com/CoolAssPuppy/landing-pages.git
-Into modulating the frontend to hold a frontend page for our eCommerce
+---
 
-10/04/26
-- Modded colors to a orange theme on the globals.css to try it out
-- Updated example-partner.ts to our new homepage
-- Updated site.ts for the whole new layout as a global config
-- Updated index.ts for the page registry (Each new page added goes here)
-    - I broke it's original function lol, rebuilt into something extra to be able to pull the pages
-    - Fixed the 
-- Modded gitignore and dockerignore
-- Updated .env.local to get the connection with my API
-- Created new folder at src/app -> products/ containing pages for the products initially
-    What each file does
-    - page.tsx runs on the server — fetches products and categories in parallel before sending HTML to the browser. The product grid arrives pre-filled, not empty. Google sees real products.
-    - ProductsClient.tsx takes over on the browser — handles the search input, category dropdown, price range and pagination. Every filter change hits your GET /inventory/products endpoint with the right query params. Shows a skeleton animation while loading.
-    - ProductCard.tsx is a pure display component — receives one product, shows image (or a placeholder if none uploaded yet), name, description, price in BRL format, stock count, and an "Esgotado" badge when out of stock. Clicking it will navigate to /products/{id} which we build next.
+# Phase 3 — Frontend Rebuild
 
-13/04/26
-- Minor design issue update - Database field in Pydantic not allowing Enterprise to be optional
-Changed models/registers.py and routers/auth.py
-- Also changed Address to be registered after the client registers, not before as it was in the order
+## 09/04/26 — Frontend Base
 
-14/04/26
-- Bruhhh Flameshot + Gemini can cook?! Modified Main page on the frontend
-- Created acheaqui-preview.ts and added it to index (Eventually will replace the old main page)
-- Created: login/register, store-profile and updated index for display
+### Frontend
 
-15/04/26
-- 4 New Static pages just like before added for a later implementation (Product datil, check-out, cart, dashboard)
-- Updated FEnd pages: Cart, Checkout, Dashboard. Added: Success indicating a succesful order
+* Found an open-source frontend base:
 
-16/04/26
-- Out of tokens again lol, welp, making dynamic pages to split projects up: cart, checkout, dashboard, login, register
-- The rest will remain as static pages as of now
+  * [https://github.com/CoolAssPuppy/landing-pages.git](https://github.com/CoolAssPuppy/landing-pages.git)
 
-17/04/26
-- I had an wild idea... I'll reset the frontend page, learn it from scratch, it served good as a template, but let's go with something me'ish made lol.
-    - types/index.ts — TypeScript now knows the shape of every piece of data from your backend. No more guessing field names.
-    - lib/auth.ts — token storage in one place. Every component that needs auth imports from here. Changing to cookies later means editing one file.
-    - lib/api.ts — every single API call in one file. If your backend URL changes, you change one line. If an endpoint changes, you fix one function.
-    - globals.css — your warm pastel theme applied everywhere automatically.
-    - layout.tsx — Navbar and Footer now appear on every page without you adding them manually.
-    - Navbar.tsx — reads localStorage on mount, shows login/logout based on auth state, has mobile menu, shows Dashboard link only to entrepreneurs.
-    - page.tsx — temporary redirect to /products so the app loads something at /.
-- Had an inner fight with .css files, had to fit the whole stuff into @theme lol
+### Goal
 
-20/04/26
-- Login page time! (Just before Tiradentes Lol) / page created at app/login/
-1. Show email + password form
-2. Call POST /auth/login via api.ts
-3. On success → store token + user in localStorage
-4. Redirect to /products (or wherever they came from)
-5. On error → show the error message from the API
-6. If already logged in → redirect away (no point showing login)
+Adapt the template into the AcheAqui marketplace frontend.
 
-- Register page as well!
-Step 1 — Basic info (everyone fills this)
-  first_name, last_name, CPF, email, phone, birthdate, password
-  → calls POST /auth/register
+---
 
-Step 2 — Optional entrepreneur registration
-  "Deseja vender no AcheAqui?" → Yes/No choice
-  If Yes → shows CNPJ + phone fields
-          → calls POST /auth/register/entrepreneur
-  If No  → skips straight to login redirect
+## 10/04/26 — Frontend Customization
 
-- Fix onto products folder, lib folder with api files directing to localhost instead of 127.0.0.1 (Linux things...)
-- Fix applied onto main.py so CORS can accept the number version of API :v
+### UI Changes
 
-21/04/26
-- Fixing API Block part 2...
-next.config.ts file was directing somewhere else, redirected to localhost for now
-This guy also loads Cloudinary images... essentially border patrol lol (Partially fixed haha)
-- After the change above, fixing the page.tsx of login and products, because of aggresive redirects and converting products to full client-side
+* Switched to orange color palette
+* Updated homepage layouts
+* Reworked site config and registry system
 
-22/04/26
-- Login/Registering works... but the tokens are not refreshing, thanks React for that and its useEffect on mount it is only working once, time to fix that, because layout.tsx is only mounting it once, by building an AuthContext to tell the navbar to refresh
-    - Also updated layout to wrap up AuthContext, Navbar, Login/Success and Register pages too
-    - api.ts has to be altered as well... (Otherwise I need a token authorization lol, this update at line 80 it access the optional token parameter)
-    - Line 28 on login page, to pass the token directly
-    - Line 75 on register page, same thing
-- Page for Products id created at app! What does it do:
-    -   Image gallery — shows the main image large, with clickable thumbnails below if there are multiple images. Falls back to a placeholder SVG if no images uploaded.
-    - Quantity picker — + and − buttons capped at in_stock max so you can't order more than available.
-    - Add to cart — if not logged in, button says "Entrar para comprar" and redirects to login. If logged in, calls POST /ordering/cart and shows a green confirmation.
-    - Star picker — interactive stars for the review form, hover effect included.
-    - Reviews — shows all reviews with date and stars. Form only appears when logged in — guests see a "login to review" prompt instead.
-- Page for Cart has been made:
-    - Enriched cart items — the cart API returns only IDs and values. We immediately fetch each product's details in parallel with Promise.all so names and images appear alongside quantities.
-    - Quantity controls — +/− buttons call PUT /ordering/cart/{id} with the new quantity AND recalculated total_value. The item grays out while updating so you can't double-click.
-    - Remove button — the trash icon calls DELETE /ordering/cart/{id} and removes the item from state immediately — no page reload needed.
-    - Sticky order summary — the right column stays visible as you scroll through a long cart. Shows itemized breakdown and total. The "frete calculado no checkout" message sets expectations correctly.
-    - Empty cart state — if cart is empty shows a friendly message with a link back to products instead of a blank page.
+### Products Page
 
-23/04/26
-- Cart when adding a product to id shows [object Object] error... Time to fix it:
-    - Changing models/ordering.py: router takes client_id from current_user automatically, but CartBase still requires it in the request body. Fix in models/ordering.py commenting the client out to fix the 422 error.
-    - [object Object] fix: line 181 of page in product id to see if displays a text
-- Cart has been fixed! Onto the ckeckout page:
-    1. Show cart summary (what they're buying)
-    2. Collect delivery address
-    3. Collect payment method (Pix, Credit Card, Boleto)
-    4. On confirm:
-    → POST /ordering/orders    → creates the order
-    → POST /ordering/payments  → creates the payment record
-    → POST /ordering/delivery  → creates delivery record
-    → Redirect to /success
-    5. Protected — redirect to /login if not logged in
-- Also created success page, where it redirects after a successful purchase
-    - [object Object] haunts me (Same setError fix applied)
+Created:
 
-24/04/26
-- Line 95 change on checkout to convert to a Number forcefully on checkout page, also line 115 on cart page to not sum words lol
-- Line 122 on checkout as well to ensure the order total is a number
-- ordering.py was the culprit, replacing key fields to enter the success screen:
-    Specifically:
-        OrderCreate — standalone class, no Base inheritance, no client_id
-        PaymentCreate — same, no client_id, no order_id confusion
-        DeliveryCreate — removed client_id, router adds it from token
-        All Response models — keep client_id since DB returns it
+* `page.tsx`
+* `ProductsClient.tsx`
+* `ProductCard.tsx`
 
-27/04/26
-- I broke checkout page because I have two handlesubmits at the same time :v Now fixed with just one present with the functions to remove the cart items after purchased.
+### Features
 
---- Progress Check - TODO ---
-Week 1 → Homepage + Store profile (visual impact)
-Week 2 → Polish all pages + fix remaining buttons
-Week 3 → Testing + bug fixes
-Week 4 → Final deployment prep + presentation
+* Server-side rendering
+* Product/category fetching
+* Search & filters
+* Skeleton loading states
+* Product stock handling
+* Product detail routing
 
-28/04/26
-- Added Dashboard for entrepreneurs only (TO ADD a enterprise registration after registering Physical person)
-- Added the real homepage (src/app/page.tsx), what does it do:
-    - Hero — gradient background with decorative blurred circles, search bar that redirects to /products?search=query, two CTAs, and trust indicators. The search hits your existing filter endpoint directly.
-    - Categories — fetches real categories from API, maps names to emojis automatically. Falls back to 6 static categories if the API returns empty (useful when DB is fresh). Each card links to /products?category_id=X.
-    - Featured products — fetches 8 available products and renders them using the same ProductCard component from the products page — consistent look, no duplicate code.
-    - Entrepreneur CTA — full-width terracotta section with 3 benefit cards. Links to /register.
-    - Newsletter — simple email form, shows success message after submit. Placeholder for now — connecting to a real email service (Mailchimp, Resend) is a post-delivery task.
-- Creative categories annoy me lol, gonna make them fixed to avoid 500 errors happening ;-; what is being fixed:
-    - Created 12 Fixed Categories on DB
-    - Modified routers/inventory.py adding Admin Key to POST / inv / category
+---
 
-29/04/26
-- Modified inventory.py in routers to remove response_model=list[CategoryResponse] from there (line 28)
-    - It worked!!! Pydantic tried to validate a dict as a list — that's a type mismatch. Instead of returning a nice error it crashed with a 500 because the validation happens after the DB query succeeds, inside FastAPI's response serialization layer.
-- Created Store's page file, what it does:
-    - Store header — gradient banner, store avatar with emoji, verified badge when status=true, phone contact, member since date, and three stats (products count, avg rating, review count).
-    - Tabs — Products and Reviews tabs switch between the two views without page reload.
-    - Products tab — uses the same ProductCard component from the products page. Filtered by entrepreneur_id so only their products show.
-    - Reviews tab — fetches reviews from up to 5 of their products in parallel and combines them. Shows a max of 10 reviews to avoid overwhelming the page.
-- Updated ProductCard.tsx to go to the store advertiser of the product
-    - Did a whole link replacement because it was composing the whole div, redirecting it to the image and name, and the see store now is split from them :D
-    - Change to apply to backend and front eventually: Add a field to the Entrepreneur create a name for their store
- 
-30/04/26
-- All stores in the website page list to add, done in api.ts Enrepreneurs List
-- Page for Store's list created, what each of them do:
-    - Store cards — each card shows a gradient banner, store avatar emoji, verified badge, phone number, product count and member since date. Clicking navigates to /loja/{id}.
-    - Product count — fetches GET /inventory/products?entrepreneur_id=X&limit=1 for each store. We only need total from the response so limit=1 keeps it fast — one tiny request per store instead of loading all products.
-    - Search — filters client-side by phone or CNPJ since the entrepreneurs list is small. No API call needed on each keystroke.
-    - Empty states — if no stores exist shows a "Seja o primeiro" CTA. If search returns nothing shows a clear filter button.
-    - Bottom CTA — when stores exist, a subtle "Quer ter sua loja aqui?" card at the bottom nudges new entrepreneurs to register.
-    - Small tweak into /loja in Footer/Navbar components because of an "s" lol
-- Part 1 Done! Part 2 is on! (Refinements and etc for now)
-    - Updated DB Entrepreneur to register a Store name as well
-    - Updated registers.py in models/ line 53
-    - Updated auth.py in routers/ Lines 143, 144, 147, 5, 99
+## 17/04/26 — Frontend Restart
 
-04/05/26
-- Time for the updates and refinements
-    types/index.ts -> Including store_name into the equation, line 57
-    register/page.tsx -> Also including store_name there, line 21, 41, 238 to 255
-    loja/page.tsx -> store_name into lines: 54, 68
+> Had a wild idea... rebuild the frontend from scratch instead of relying on the template.
 
-05/05/26
-- New Updates today:
-    loja/id/page.tsx -> The entrepreneur object now has store_name from the DB — we show it if it exists, fall back to Loja #ID if not. Line 181 to 183
-    components/navbar.tsx -> Lines 64 to 69 will import the function starting at Line 11 to 34 - The badge reads the cart count when the user logs in. It won't update in real-time as you add items (that would need a global cart context) but it shows the correct count on page load
-- Added minha-conta for non enterprise users
-    Updated navbar to navigate to the account page, lines 90 to 92 to a clickable link
-    Updated register and loja pages
+### Architecture
 
-06/05/26
-- Updates of the day:
-    - Masks for typing addresses and documents, created in lib/masks.ts
-    cleanest approach for Next.js is a small utility function — no extra library needed
-    surgical onChange edits, applied on register page (Import added line 8 and onChange at lines 165, 175, 249, 263)
-    - Import mask on checkout page line 15, line 177 onChange applied
-    - New Update! Stores can now show profile pictures, banners and custom backgrounds!
-    models/register.py, lines 54 to 55
-    routers/register.py, lines 188 to 243 to upload images
-    - Banner presets time, new file added as lib/presets.ts
-    Line 56 included on models/registers.py
-    Line 157 to 167 replacing banner div on loja/id/page.tsx
-    dashboard/page.tsx change into lines 272 to 299, selectedPreset const line 38, and import at line 18
-    - Adding the images of the products into other pages too, helper added in api.ts starting at line 335
-    Lines 68 changed as well to getProductWithImage import on ProductsClient page
-    Lines 16 and 42 changed on app page to adapt as well
-    - Adding an edit to SAVE the changes in a store profile after created
-    Lines 246 to 267 added in routers/registers.py, import on line 3 as well
-    Dashboard field addition of a save button (Lines 303 to 309 and the async function Lines 167 to 180)
+#### `types/index.ts`
 
-07/05/26
-- Yet again, Dasboard tweaks:
-    Save button was not working for a lack of a import of the store page header, added it and tweaked the save button too
+* Centralized TypeScript types
 
-- Major fixes below:
-    - Altering character limits on CPF, CNPJ and CEP stuff because of the masks on database
-    - json defined multiple times in ProductsClient page (Fixing the fetchProducts cons - Line 55 to 72)
-    - Being locked out my website haha, token expires but the Navbar still shows as logged in from localStorage. Add token validation on app startup in src/context/AuthContext.tsx (line 48 to 70)
-    - loja/id not showing product image (Added getProductsWithImages to it replacing getProducts)
-    - Edible profile banner and picture custom after registering (Upload added to api.ts line 319 to 344)
-    Change applied to dashboard page as well:
-    const added lines 42 to 45
-    functions added lines 189 to 217
-    upload buttons added lines 325 to 377
+#### `lib/auth.ts`
 
-08/05/26
-- Hopefully last update lol (for now)
-    Store name changeable even after registration:
-    models/registers.py change on update_entrepreneur field line 69
-    API call added as well, lines 385 to 403
-    Dashboard UI page lines 222 to 238 handler, 48 and 49 consts, 348 to 370 divs
+* Token management abstraction
 
-09/05/26
-- Hopefully the last update (deja vu, i know, so consider it a 2.0 version)
-    - Categories only showing "Todos", change applied to fetch empty arrays, before it was getting props, ProductsClient.tsx
-    - Removed pass from ReviewCreate, as now we have things to insert
-    - On sote id page there was a code in the wrong place haha
-    - Stock count not updating after purchase: added a refresh const to handleAddToCart on products/id/page
-    - Cart page not showing product image: Same fix applied into other fields to fetch getProductImages too
-    - Profile picture not showing on store page, updating state type on loja/id/page, same changes related to banner also applied here
-    - Change to register a business after registration done to guide to the register business page instead, new page created for that if done later;
-    - A link to guide to the user store in dashboard has been added;
-    - Seller info update to show store's name and guide to the page;
-    - QR Code sharing, installed a library for it, to alter loja id page later;
-    - PDF Receipt printing/saving, added library to the success page;
-    - TS hates requires lol, changed to import instead
+#### `lib/api.ts`
 
-12/05/26
-- Back into fixing these fields:
-    - Remove custom banner preset, line 172 in routers/registers.py: if v is not None filters out null entirely. We need to explicitly allow nullable fields through so they can be set to NULL in the DB.
-    - Reviews field... removed client_id cuz call conflict in analytic model, added client first name and first letter of surname for privacy
+* Centralized API layer
 
+#### `layout.tsx`
 
+* Shared Navbar/Footer setup
 
+#### `Navbar.tsx`
+
+* Dynamic auth rendering
+* Mobile support
+* Entrepreneur-only dashboard links
+
+### Styling
+
+* Reworked the global pastel theme
+
+> Had an inner fight with CSS and @theme lol
+
+---
+
+# Phase 4 — Authentication & Commerce
+
+## 20/04/26 — Login & Register Pages
+
+### Login Flow
+
+* Email/password login
+* Token storage
+* Redirect logic
+* Error handling
+* Auto redirect when already authenticated
+
+### Register Flow
+
+#### Step 1
+
+* Basic client registration
+
+#### Step 2
+
+Optional entrepreneur registration:
+
+* Store creation
+* CNPJ registration
+* Entrepreneur setup
+
+### Fixes
+
+* Fixed localhost vs 127.0.0.1 API issues
+* Updated CORS handling
+
+---
+
+## 22/04/26 — Auth Context & Product Details
+
+### Authentication Fixes
+
+* Created `AuthContext`
+* Navbar now refreshes auth state correctly
+
+### Product Details Page
+
+Features:
+
+* Image gallery
+* Quantity picker
+* Add-to-cart logic
+* Interactive reviews
+* Login-required review forms
+
+### Cart Page
+
+Features:
+
+* Parallel product fetching
+* Quantity controls
+* Remove item support
+* Sticky order summary
+* Empty cart state
+
+---
+
+## 23/04/26 — Checkout Flow
+
+### Bug Fixes
+
+* Fixed `[object Object]` cart error
+* Fixed `client_id` conflicts in ordering models
+
+### Checkout Goals
+
+* [x] Cart summary
+* [x] Delivery address
+* [x] Payment methods
+* [x] Order/payment/delivery creation
+* [x] Success page redirect
+
+### Success Page
+
+* Added successful purchase page
+
+> `[object Object]` keeps haunting me
+
+---
+
+## 27/04/26 — Checkout Fixes
+
+### Fixes
+
+* Removed duplicate `handleSubmit`
+* Added automatic cart cleanup after purchase
+
+---
+
+# 📊 Progress Check
+
+## Week 1
+
+* Homepage
+* Store profile
+
+## Week 2
+
+* UI polish
+* Button fixes
+
+## Week 3
+
+* Testing
+* Bug fixing
+
+## Week 4
+
+* Deployment prep
+* Presentation
+
+---
+
+# Phase 5 — Stores & Dashboard
+
+## 28/04/26 — Dashboard & Homepage
+
+### Dashboard
+
+* Entrepreneur-only dashboard added
+
+### Homepage Features
+
+* Hero section
+* Product search
+* Dynamic categories
+* Featured products
+* Entrepreneur CTA
+* Newsletter section
+
+### Backend
+
+* Added fixed categories in DB
+* Added admin protection for category creation
+
+---
+
+## 29/04/26 — Store Pages
+
+### Fixes
+
+* Fixed response model mismatch causing 500 errors
+
+### Store Page Features
+
+* Store banners
+* Product/review tabs
+* Review aggregation
+* Product linking improvements
+
+### Backend Changes
+
+* Added `store_name` support
+
+---
+
+## 30/04/26 — Stores Listing
+
+### Features
+
+* Store cards
+* Search system
+* Empty states
+* Product counts
+* Entrepreneur CTA
+
+### Improvements
+
+* Added `store_name` DB support
+* Updated auth/register logic
+
+---
+
+## 06/05/26 — Store Customization
+
+### Input Masks
+
+Created:
+
+* `lib/masks.ts`
+
+### Store Visual Customization
+
+Stores can now have:
+
+* Profile pictures
+* Custom banners
+* Preset backgrounds
+
+### Dashboard Updates
+
+* Added save/edit support
+* Added upload functionality
+
+### Product Images
+
+* Product images now appear across multiple pages consistently
+
+---
+
+## 07/05/26 — Major Fixes
+
+### Dashboard
+
+* Fixed save button import issue
+
+### Authentication
+
+* Added token validation on startup
+
+### Store Fixes
+
+* Product images fixed on store pages
+* Editable profile banners
+* Editable profile pictures
+
+---
+
+## 08/05/26 — Store Editing Improvements
+
+### Features
+
+* Store name editable after registration
+* Added update API endpoints
+* Dashboard editing improvements
+
+---
+
+## 09/05/26 — Final Refinements (v2.0-ish 😭)
+
+### Fixes
+
+* Categories only showing "Todos"
+* Product stock updates after purchases
+* Cart product images missing
+* Profile banners not rendering
+
+### New Features
+
+* Business registration flow after signup
+* Dashboard → Store quick link
+* QR code sharing support
+* PDF receipt generation
+
+> TS hates `require()` lol
+
+---
+
+## 12/05/26 — Analytics & Nullable Fields
+
+### Backend Fixes
+
+* Allowed nullable banner preset fields
+* Fixed analytics review conflicts
+
+### Privacy Update
+
+* Reviews now show:
+
+  * client first name
+  * first letter of surname
+
+instead of exposing full user information.
+
+---
+
+# 🎯 Final Notes
+
+This project evolved from a backend-focused marketplace experiment into a full-stack eCommerce platform with:
+
+* Authentication
+* Store systems
+* Product management
+* Checkout flow
+* Dashboards
+* Cloud image handling
+* Docker deployment
+* Frontend rebuilds
+* Real-world bug fixing
+
+And probably another future rewrite somewhere down the road lol.
