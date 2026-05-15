@@ -4,6 +4,7 @@ from typing import Optional
 from psycopg.rows import dict_row
 import psycopg
 
+from pydantic import BaseModel as PydanticBase
 from database import get_db
 from auth import get_current_user
 from upload import upload_image, delete_image
@@ -358,5 +359,42 @@ async def delete_my_account(
                 (current_user["clients_id"],)
             )
             return {"message": "Account deleted successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+# ══════════════════════════════════════════════════════════════════════════════
+# Password Reset
+# ══════════════════════════════════════════════════════════════════════════════
+
+class PasswordReset(PydanticBase):
+    email: str
+    new_password: str
+
+@router.post("/clients/reset-password")
+async def reset_password(
+    data: PasswordReset,
+    conn: psycopg.AsyncConnection = Depends(get_db("registers")),
+    x_admin_key: str = Header(..., description="Admin key required")
+):
+    """Admin endpoint to reset a client's password."""
+    if x_admin_key != os.getenv("ADMIN_KEY"):
+        raise HTTPException(status_code=403, detail="Not authorized.")
+    try:
+        from auth import hash_password
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "SELECT clients_id FROM clients WHERE email = %s;",
+                (data.email,)
+            )
+            if not await cur.fetchone():
+                raise HTTPException(status_code=404, detail="Client not found.")
+            hashed = hash_password(data.new_password)
+            await cur.execute(
+                "UPDATE clients SET password = %s WHERE email = %s;",
+                (hashed, data.email)
+            )
+            return {"message": "Password reset successfully."}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -112,6 +112,13 @@ export default function LoginPage() {
             >
               {loading ? "Entrando..." : "Entrar"}
             </button>
+
+            <Link
+              href="/esqueci-senha"
+              className="text-xs text-primary hover:underline"
+            >
+              Esqueceu a senha?
+            </Link>
           </form>
 
           <div className="flex items-center gap-3 my-6">

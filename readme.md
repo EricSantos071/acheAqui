@@ -40,6 +40,7 @@ This README also works as a development journal documenting the project's evolut
 * Real-time cart updates
 * Email integrations
 * Final production deployment
+* Resend to use password recovery
 
 ---
 
@@ -734,6 +735,14 @@ Stores can now have:
   * first letter of surname
 
 instead of exposing full user information.
+
+---
+
+## 15/05/26 — Password Recovery System via Swagger
+
+### New Features
+
+* When the user forgets the password, send a token request to admin (me)
 
 ---
 
