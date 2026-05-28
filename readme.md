@@ -746,6 +746,10 @@ instead of exposing full user information.
 
 ---
 
+## 28/05/26 — Product Stock deduction
+
+* Updated create_order in routers/ordering.py to decrement the product's stock, and avoid it reaching 0 with GREATEST(in_stock - %s, 0)
+
 # 🎯 Final Notes
 
 This project evolved from a backend-focused marketplace experiment into a full-stack eCommerce platform with:

@@ -164,8 +164,8 @@ export default function StoreProfilePage() {
       {/* ── Store header ──────────────────────────────────────────────────── */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden mb-8">
 
-        {/* Banner */}
-        <div className={`h-32 ${
+        {/* Banner - Updated banner size, before it looked like a bagette */}
+        <div className={`w-full h-48 sm:h-64 md:h-72 lg:h-80 xl:h-96 min-h-[192px] ${
             entrepreneur.banner_image
               ? ""
               : BANNER_PRESETS.find(p => p.id === (entrepreneur.banner_preset ?? 1))?.style ?? BANNER_PRESETS[0].style

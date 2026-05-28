@@ -196,11 +196,34 @@ async def create_order(
 ):
     try:
         async with conn.cursor(row_factory=dict_row) as cur:
+            # 1. Create the order as before
             await cur.execute(
                 "INSERT INTO orders (order_total, status, client_id) VALUES (%s, %s, %s) RETURNING *;",
                 (order.order_total, order.status, current_user["clients_id"])
             )
-            return await cur.fetchone()
+            new_order = await cur.fetchone()
+
+            # 2. Fetch client's cart items
+            await cur.execute(
+                "SELECT product_id, quantity FROM ordering_system.cart WHERE client_id = %s;",
+                (current_user["clients_id"],)
+            )
+            cart_items = await cur.fetchall()
+
+            # 3. Decrement stock for each product
+            for item in cart_items:
+                await cur.execute(
+                    """
+                    UPDATE inventory.products
+                    SET in_stock = GREATEST(in_stock - %s, 0),
+                        status = CASE WHEN in_stock - %s <= 0 THEN false ELSE status END
+                    WHERE product_id = %s;
+                    """,
+                    (item["quantity"], item["quantity"], item["product_id"])
+                )
+
+            return new_order
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

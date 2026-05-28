@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // ── Development configuration ─────────────────────────────────────────────
+  // Allows testing the dev server from your mobile phone on the local network
+  //Fix this later to fetch tests on phone
+  //allowedDevOrigins: ["172.16.138.35"],
+
   // ── Image domains ──────────────────────────────────────────────────────────
   // Add Cloudinary so product images load correctly
   images: {
