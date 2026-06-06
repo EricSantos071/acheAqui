@@ -750,6 +750,20 @@ instead of exposing full user information.
 
 * Updated create_order in routers/ordering.py to decrement the product's stock, and avoid it reaching 0 with GREATEST(in_stock - %s, 0)
 
+## 03/06/26
+
+* Modding some presentation trough Ngrok and Tailscale
+changed local enviroment and configs of next
+
+## 05/06/26
+
+* Frontend test on phone went successful
+Adjusting api fetch ts (again) debugging section
+CORS once again tarnishes me, after allowing the origin, it worked!!
+
+REMINDER: Go to gitignore.io
+
+
 # 🎯 Final Notes
 
 This project evolved from a backend-focused marketplace experiment into a full-stack eCommerce platform with:

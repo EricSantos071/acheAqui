@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  
+  //Stuff to make connection on the phone, hoo boy
+  allowedDevOrigins: [
+    "handprint-sultry-reusable.ngrok-free.dev",
+  ],
 
   // ── Development configuration ─────────────────────────────────────────────
   // Allows testing the dev server from your mobile phone on the local network

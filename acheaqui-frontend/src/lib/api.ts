@@ -25,6 +25,10 @@ import type {
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
+//Debug test for the phone connection
+console.log("NEXT_PUBLIC_API_URL =", process.env.NEXT_PUBLIC_API_URL);
+console.log("API =", API);
+
 // ── Helper: handle response errors consistently ────────────────────────────────
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {

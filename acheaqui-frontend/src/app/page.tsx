@@ -13,7 +13,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getCategories, getProductsWithImages } from "@/lib/api";
+import { getCategories, getProducts, getProductsWithImages } from "@/lib/api";
 import ProductCard from "./products/ProductCard";
 import type { Category, Product } from "@/types";
 
@@ -41,6 +41,12 @@ export default function HomePage() {
           getCategories(),
           getProductsWithImages({ limit: 8, status: true, page: 1 }),
         ]);
+
+        //Debug phone test
+        // console.log("Categories:", cats);
+        // console.log("Products response:", prods);
+        // console.log("Products count:", prods?.data?.length);
+
         setCategories(cats.data);
         setFeatured(prods.data);
       } catch (err) {
