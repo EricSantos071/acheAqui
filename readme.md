@@ -761,6 +761,11 @@ changed local enviroment and configs of next
 Adjusting api fetch ts (again) debugging section
 CORS once again tarnishes me, after allowing the origin, it worked!!
 
+## 12/06/26
+Added a .sh executor to run the code easier in the presentation day
+Got TokenBlocked lol
+Somehow it worked after applying some console tests on lol (To fix buttons later on)
+
 REMINDER: Go to gitignore.io
 
 

@@ -24,8 +24,12 @@ export default function LoginPage() {
       // 1. Login → get token
       const data = await login(email, password);
 
-      // 2. Fetch full profile
+      // 2. Fetch full profile - Debug consoles added
+      console.log("LOGIN DATA:", data);
+
       const me = await getMe(data.access_token);
+
+      console.log("ME DATA:", me);
 
       // 3. loginSuccess updates BOTH localStorage AND global context state
       //    This triggers Navbar to re-render with the greeting immediately
@@ -46,6 +50,7 @@ export default function LoginPage() {
       }
 
     } catch (err) {
+      console.error("LOGIN ERROR:", err);
       setError(err instanceof Error ? err.message : "Erro ao fazer login.");
     } finally {
       setLoading(false);
