@@ -766,6 +766,9 @@ Added a .sh executor to run the code easier in the presentation day
 Got TokenBlocked lol
 Somehow it worked after applying some console tests on lol (To fix buttons later on)
 
+## 15/06/26
+Fixes applied into dashboard -> HandleClearBanner function was cleaning everything
+
 REMINDER: Go to gitignore.io
 
 

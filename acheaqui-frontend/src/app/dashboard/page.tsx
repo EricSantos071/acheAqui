@@ -223,9 +223,24 @@ export default function DashboardPage() {
 
   async function handleClearBanner() {
     if (!user?.entrepreneur_id) return;
-    await updateEntrepreneur(user.entrepreneur_id, { banner_image: null });
-    setPresetSaved(true);
-    setTimeout(() => setPresetSaved(false), 3000);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/registers/entrepreneurs/${user.entrepreneur_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeader(),
+          },
+          body: JSON.stringify({ banner_image: null }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to clear banner");
+      setPresetSaved(true);
+      setTimeout(() => setPresetSaved(false), 3000);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   // ── Store name update handler ──────────────────────────────────────────────────
