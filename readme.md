@@ -769,6 +769,12 @@ Somehow it worked after applying some console tests on lol (To fix buttons later
 ## 15/06/26
 Fixes applied into dashboard -> HandleClearBanner function was cleaning everything
 
+## 16/06/26
+Buttons on dashboard fixed to be viewed trough phone
+
+## 18/06/26
+Also editing the store name and phone in case an oopsie happens, changes applies into dashboard page
+
 REMINDER: Go to gitignore.io
 
 

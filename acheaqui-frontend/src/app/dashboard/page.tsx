@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [storeName, setStoreName] = useState("");
   const [savingName, setSavingName] = useState(false);
+  const [storePhone, setStorePhone] = useState("");
 
   // ── Data state ─────────────────────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([]);
@@ -244,13 +245,15 @@ export default function DashboardPage() {
   }
 
   // ── Store name update handler ──────────────────────────────────────────────────
-  async function handleSaveStoreName() {
-    if (!user?.entrepreneur_id || !storeName.trim()) return;
+  async function handleSaveStoreInfo() {
+    if (!user?.entrepreneur_id) return;
     setSavingName(true);
     try {
-      await updateEntrepreneur(user.entrepreneur_id, {
-        store_name: storeName.trim()
-      });
+      const data: { store_name?: string; phone?: string } = {};
+      if (storeName.trim()) data.store_name = storeName.trim();
+      if (storePhone.trim()) data.phone = storePhone.trim();
+      if (Object.keys(data).length === 0) return;
+      await updateEntrepreneur(user.entrepreneur_id, data);
       setPresetSaved(true);
       setTimeout(() => setPresetSaved(false), 3000);
     } catch (err) {
@@ -306,7 +309,7 @@ export default function DashboardPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between flex-wrap gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
             Olá, {user.first_name}! 👋
@@ -317,14 +320,14 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={() => { setShowForm(true); setTab("products"); }}
-          className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity hidden sm:flex items-center gap-2"
+          className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
         >
           + Novo produto
         </button>
         {user.entrepreneur_id && (
           <Link
             href={`/loja/${user.entrepreneur_id}`}
-            className="h-10 px-4 rounded-xl border border-border text-sm text-foreground hover:bg-accent transition-colors hidden sm:flex items-center gap-2"
+            className="h-10 px-4 rounded-xl border border-border text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-2"
           >
             🏪 Ver minha loja
           </Link>
@@ -377,25 +380,53 @@ export default function DashboardPage() {
 
           {/* Store name upgrade */}
           <div className="mb-6 pb-6 border-b border-border">
-            <p className="text-sm font-medium text-foreground mb-2">
-              Nome da loja
+            <p className="text-sm font-medium text-foreground mb-3">
+              Informações da loja
             </p>
-            <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={storeName}
-                onChange={(e) => setStoreName(e.target.value)}
-                placeholder="Ex: Doces da Mari"
-                maxLength={100}
-                className="flex-1 h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <button
-                onClick={handleSaveStoreName}
-                disabled={savingName || !storeName.trim()}
-                className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
-                {savingName ? "Salvando..." : "Salvar"}
-              </button>
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-muted-foreground">
+                  Nome da loja
+                </label>
+                <input
+                  type="text"
+                  value={storeName}
+                  onChange={(e) => setStoreName(e.target.value)}
+                  placeholder="Ex: Doces da Mari"
+                  maxLength={100}
+                  className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-muted-foreground">
+                  Telefone do negócio
+                </label>
+                <input
+                  type="tel"
+                  value={storePhone}
+                  onChange={(e) => {
+                    const masked = e.target.value
+                      .replace(/\D/g, "").slice(0, 11)
+                      .replace(/(\d{2})(\d)/, "($1) $2")
+                      .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
+                    setStorePhone(masked);
+                  }}
+                  placeholder="(48) 99999-9999"
+                  className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSaveStoreInfo}
+                  disabled={savingName || (!storeName.trim() && !storePhone.trim())}
+                  className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {savingName ? "Salvando..." : "Salvar informações"}
+                </button>
+                {presetSaved && (
+                  <span className="text-sm text-green-600 font-medium">✓ Salvo!</span>
+                )}
+              </div>
             </div>
           </div>
 
